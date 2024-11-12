@@ -1,7 +1,8 @@
 export * from './Gen1PokemonIndex'
 export * from './Gen3PokemonIndex'
-export * from './Gen3RRPokemonIndex'
-export * from './Gen3RRMovesIndex'
 export * from './Gen3RRItems'
+export * from './Gen3RRMovesIndex'
+export * from './Gen3RRPokemonIndex'
 export * from './Gen3StringEncoding'
 export * from './SVPokemonIndex'
+

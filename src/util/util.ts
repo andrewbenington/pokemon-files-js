@@ -95,7 +95,7 @@ export const generatePersonalityValuePreservingAttributes = (
         Number(newPersonalityValue & BigInt(1)) + 1 === otherAbilityNum) &&
       (otherNature === undefined || newNature === otherNature) &&
       getIsShinyPreGen6(mon.trainerID, mon.secretID ?? 0, Number(newPersonalityValue)) ===
-        mon.isShiny()
+      mon.isShiny()
     ) {
       return Number(newPersonalityValue)
     }

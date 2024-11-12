@@ -203,10 +203,10 @@ export const decryptByteArrayGen6 = (bytes: ArrayBuffer) => {
 }
 
 export const get8BitChecksum = (bytes: ArrayBuffer, start: number, end: number): number => {
-  const byteArray = new Uint8Array(bytes); 
+  const byteArray = new Uint8Array(bytes);
   let checksum = 0;
   for (let i = start; i <= end; i += 1) {
-    checksum += byteArray[i]; 
+    checksum += byteArray[i];
     checksum = checksum & 0xff;
   }
   return checksum;

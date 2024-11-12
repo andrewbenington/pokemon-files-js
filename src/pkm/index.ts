@@ -48,7 +48,6 @@ export type PKM =
   | PA8
   | PB8
   | PK9
-
 export type PKMType =
   | typeof PK1
   | typeof PK2

@@ -53,7 +53,7 @@ export class PK3 {
   ivs: types.Stats
   isEgg: boolean
   isNicknamed: boolean
-  ribbonBytes: ArrayBuffer
+  ribbonBytes: Uint8Array
   isFatefulEncounter: boolean
   statusCondition: number
   currentHP: number
@@ -184,7 +184,7 @@ export class PK3 {
       }
       this.isEgg = other.isEgg ?? false
       this.isNicknamed = other.isNicknamed ?? false
-      this.ribbonBytes = other.ribbonBytes ?? new ArrayBuffer(4)
+      this.ribbonBytes = other.ribbonBytes ?? new Uint8Array(4)
       this.isFatefulEncounter = other.isFatefulEncounter ?? false
       this.statusCondition = other.statusCondition ?? 0
       this.currentHP = other.currentHP

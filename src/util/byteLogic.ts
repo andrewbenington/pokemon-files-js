@@ -118,7 +118,7 @@ export function uIntFromBufferBits(
   if (bitCount > 32) {
     throw new Error('bitCount must be <= 32')
   }
-  
+
   const totalBits = (dataView.byteLength - byteOffset) * 8;
   if (bitOffset + bitCount > totalBits) {
     throw new Error('Requested bit range exceeds available data');
