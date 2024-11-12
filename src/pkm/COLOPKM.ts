@@ -59,7 +59,7 @@ export class COLOPKM {
   shadowGauge: number
   ribbons: string[]
 
-  constructor(arg: ArrayBuffer | AllPKMFields, encrypted?: boolean) {
+  constructor(arg: ArrayBuffer | AllPKMFields) {
     if (arg instanceof ArrayBuffer) {
       const buffer = arg
       const dataView = new DataView(buffer)
@@ -182,7 +182,7 @@ export class COLOPKM {
     return new COLOPKM(buffer)
   }
 
-  toBytes(options?: types.ToBytesOptions): ArrayBuffer {
+  toBytes(): ArrayBuffer {
     const buffer = new ArrayBuffer(312)
     const dataView = new DataView(buffer)
 

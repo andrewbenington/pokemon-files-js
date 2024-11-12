@@ -202,14 +202,16 @@ export const decryptByteArrayGen6 = (bytes: ArrayBuffer) => {
   return decryptByteArray(bytes, encryptionConstant, GEN6_BLOCK_SIZE, GEN456_BLOCKS_OFFSET)
 }
 
-export const get8BitChecksum = (bytes: ArrayBuffer, start: number, end: number) => {
-  let checksum = 0
+export const get8BitChecksum = (bytes: ArrayBuffer, start: number, end: number): number => {
+  const byteArray = new Uint8Array(bytes); 
+  let checksum = 0;
   for (let i = start; i <= end; i += 1) {
-    checksum += bytes[i]
-    checksum = checksum & 0xff
+    checksum += byteArray[i]; 
+    checksum = checksum & 0xff;
   }
-  return checksum
+  return checksum;
 }
+
 
 export const get16BitChecksumLittleEndian = (bytes: ArrayBuffer, start: number, end: number) => {
   let checksum = 0

@@ -34,7 +34,7 @@ export class PK2 {
   nickname: string
   trainerGender: boolean
 
-  constructor(arg: ArrayBuffer | AllPKMFields, encrypted?: boolean) {
+  constructor(arg: ArrayBuffer | AllPKMFields) {
     if (arg instanceof ArrayBuffer) {
       const buffer = new Uint8Array(arg)[2] === 0xff ? arg.slice(3) : arg
       const dataView = new DataView(buffer)

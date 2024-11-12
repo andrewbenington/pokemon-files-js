@@ -96,7 +96,7 @@ export class PA8 {
   ribbons: string[]
   trainerGender: boolean
 
-  constructor(arg: ArrayBuffer | AllPKMFields, encrypted?: boolean) {
+  constructor(arg: ArrayBuffer | AllPKMFields) {
     if (arg instanceof ArrayBuffer) {
       const buffer = arg
       const dataView = new DataView(buffer)
@@ -214,14 +214,7 @@ export class PA8 {
       this.exp = other.exp
       this.abilityIndex = other.abilityIndex ?? 0
       this.abilityNum = other.abilityNum ?? 0
-      this.markings = types.markingsSixShapesWithColorFromOther(other.markings) ?? {
-        circle: false,
-        triangle: false,
-        square: false,
-        heart: false,
-        star: false,
-        diamond: false,
-      }
+      this.markings = types.markingsSixShapesWithColorFromOther(other.markings)
       this.personalityValue = other.personalityValue ?? 0
       this.nature = other.nature ?? 0
       this.statNature = other.statNature ?? 0
@@ -346,7 +339,7 @@ export class PA8 {
     return new PA8(buffer)
   }
 
-  toBytes(options?: types.ToBytesOptions): ArrayBuffer {
+  toBytes(): ArrayBuffer {
     const buffer = new ArrayBuffer(376)
     const dataView = new DataView(buffer)
 

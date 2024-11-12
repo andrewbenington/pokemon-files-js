@@ -89,7 +89,7 @@ export class PB8 {
   hyperTraining: types.HyperTrainStats
   trainerGender: boolean
 
-  constructor(arg: ArrayBuffer | AllPKMFields, encrypted?: boolean) {
+  constructor(arg: ArrayBuffer | AllPKMFields) {
     if (arg instanceof ArrayBuffer) {
       const buffer = arg
       const dataView = new DataView(buffer)
@@ -202,14 +202,7 @@ export class PB8 {
       this.abilityNum = other.abilityNum ?? 0
       this.favorite = other.favorite ?? false
       this.canGigantamax = other.canGigantamax ?? false
-      this.markings = types.markingsSixShapesWithColorFromOther(other.markings) ?? {
-        circle: false,
-        triangle: false,
-        square: false,
-        heart: false,
-        star: false,
-        diamond: false,
-      }
+      this.markings = types.markingsSixShapesWithColorFromOther(other.markings)
       this.personalityValue = other.personalityValue ?? 0
       this.nature = other.nature ?? 0
       this.statNature = other.statNature ?? 0
@@ -328,7 +321,7 @@ export class PB8 {
     return new PB8(buffer)
   }
 
-  toBytes(options?: types.ToBytesOptions): ArrayBuffer {
+  toBytes(): ArrayBuffer {
     const buffer = new ArrayBuffer(344)
     const dataView = new DataView(buffer)
 

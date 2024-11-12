@@ -114,6 +114,16 @@ export function uIntFromBufferBits(
   bitCount: number,
   littleEndian: boolean = true
 ) {
+
+  if (bitCount > 32) {
+    throw new Error('bitCount must be <= 32')
+  }
+  
+  const totalBits = (dataView.byteLength - byteOffset) * 8;
+  if (bitOffset + bitCount > totalBits) {
+    throw new Error('Requested bit range exceeds available data');
+  }
+
   let num = 0
   switch (Math.ceil((bitOffset + bitCount) / 8)) {
     case 1:

@@ -6,6 +6,7 @@ import PB8Schema from './PB8.json'
 import PK1Schema from './PK1.json'
 import PK2Schema from './PK2.json'
 import PK3Schema from './PK3.json'
+import PK3RRSchema from './PK3RR.json'
 import PK4Schema from './PK4.json'
 import PK5Schema from './PK5.json'
 import PK6Schema from './PK6.json'
@@ -19,6 +20,7 @@ export const FileSchemas = {
   PK1: PK1Schema,
   PK2: PK2Schema,
   PK3: PK3Schema,
+  PK3RR: PK3RRSchema,
   PK4: PK4Schema,
   PK5: PK5Schema,
   PK6: PK6Schema,

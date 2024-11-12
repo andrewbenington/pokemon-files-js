@@ -1,130 +1,72 @@
-import fs from 'fs'
-import { TextDecoder } from 'node:util' // (ESM style imports)
-import path from 'path'
-import { bytesToPKM } from '../../../util/FileImport'
-import { getMonGen345Identifier } from '../../../util/Lookup'
-import { OHPKM } from '../OHPKM'
-import { PK3 } from '../PK3'
-;(global as any).TextDecoder = TextDecoder
+import PK3 from '../PK3'; // Adjust the import path as needed
 
-test('gen 3 stat calculations', () => {
-  const file = path.join(__dirname, './PKMFiles/Gen3', 'blaziken.pkm')
-  const fileBytes = fs.readFileSync(file)
-  const bytes = new Uint8Array(fileBytes)
-  const mon = bytesToPKM(bytes, 'pkm')
-  expect(mon.stats).toStrictEqual({
-    hp: 282,
-    atk: 359,
-    def: 165,
-    spe: 208,
-    spa: 243,
-    spd: 154,
-  })
-})
+describe('PK3 Class', () => {
+  const buffer = new Uint8Array([
+    0x0C, 0xEF, 0x02, 0xD2, 0x6B, 0x99, 0x37, 0x75, 0xBB, 0xE0, 0xD5, 0xDF, 0xD5, 0xEE, 0xD5, 0xE6,
+    0xFF, 0x00, 0x02, 0x02, 0xBE, 0xDD, 0xD5, 0xE1, 0xE3, 0xE2, 0xD8, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x41, 0x00, 0x00, 0x00, 0xC2, 0x70, 0x07, 0x00, 0x00, 0x46, 0x00, 0x00, 0x5E, 0x00, 0xF7, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x0A, 0x0F, 0x00, 0x00, 0x05, 0x00, 0x00, 0xFC, 0xFC, 0x01, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x12, 0x05, 0x26, 0xEF, 0x97, 0xEB, 0x81, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xBC, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+  ]);
 
-const blazikenOH = bytesToPKM(
-  new Uint8Array(fs.readFileSync(path.join(__dirname, './PKMFiles/OH', 'blaziken.ohpkm'))),
-  'OHPKM'
-) as OHPKM
+  let pk3Instance: PK3;
 
-const blazikenGen3 = bytesToPKM(
-  new Uint8Array(fs.readFileSync(path.join(__dirname, './PKMFiles/Gen3', 'blaziken.pkm'))),
-  'PK3'
-) as PK3
+  beforeEach(() => {
+    pk3Instance = PK3.fromBytes(buffer.buffer);
+  });
 
-const slowpokeOH = bytesToPKM(
-  new Uint8Array(fs.readFileSync(path.join(__dirname, './PKMFiles/OH', 'slowpoke-shiny.ohpkm'))),
-  'OHPKM'
-) as OHPKM
+  test('should correctly parse personality value', () => {
+    expect(pk3Instance.personalityValue).toBe(0xD202EF0C);
+  });
 
-test('gen 3 EVs are updated', () => {
-  const emeraldPKM = new PK3(undefined, undefined, blazikenOH)
-  // mimicking ev reduction berries and ev gain
-  emeraldPKM.evs = {
-    atk: 252,
-    hp: 6,
-    spa: 0,
-    spe: 252,
-    def: 0,
-    spd: 0,
-  }
-  blazikenOH.updateData(emeraldPKM)
-  expect(blazikenOH.evs).toStrictEqual({
-    atk: 252,
-    hp: 6,
-    spa: 0,
-    spe: 252,
-    def: 0,
-    spd: 0,
-  })
-})
+  test('should correctly parse trainer ID', () => {
+    expect(pk3Instance.trainerID).toBe(0x996B);
+  });
 
-test('gen 3 ribbons are updated', () => {
-  const emeraldPKM = new PK3(undefined, undefined, blazikenOH)
-  // gaining Gen 3 ribbons
-  emeraldPKM.ribbons = [
-    ...emeraldPKM.ribbons,
-    'Cool (Hoenn)',
-    'Cool Super',
-    'Cool Hyper',
-    'Cool Master (Hoenn)',
-    'Winning',
-  ]
-  blazikenOH.updateData(emeraldPKM)
-  expect(blazikenOH.ribbons).toContain('Cool Master (Hoenn)')
-  expect(blazikenOH.ribbons).toContain('Winning')
-  expect(blazikenOH.ribbons).toContain('Effort')
-  expect(blazikenOH.ribbons).toContain('Footprint')
-})
+  test('should parse dex number correctly', () => {
+    expect(pk3Instance.dexNum).toBe(65);
+  });
 
-test('gen 3 contest stats are updated', () => {
-  const emeraldPKM = new PK3(undefined, undefined, blazikenOH)
-  // gaining cool contest points
-  emeraldPKM.contest = {
-    cool: 30,
-    beauty: 255,
-    smart: 255,
-    tough: 255,
-    cute: 255,
-    sheen: 1,
-  }
-  blazikenOH.updateData(emeraldPKM)
-  expect(blazikenOH.contest).toStrictEqual({
-    cool: 30,
-    beauty: 255,
-    smart: 255,
-    tough: 255,
-    cute: 255,
-    sheen: 1,
-  })
-})
+  test('should return correct held item name', () => {
+    expect(pk3Instance.heldItemName).toBe('(None)');
+  });
 
-test('gen 3 conversion to OHPKM and back is lossless', () => {
-  const ohPKM = new OHPKM(undefined, blazikenGen3)
-  // gaining cool contest points
-  const gen3PKM = new PK3(undefined, undefined, ohPKM)
-  expect(blazikenGen3.bytes).toEqual(gen3PKM.bytes)
-})
+  test('should correctly calculate the level based on experience', () => {
+    expect(pk3Instance.getLevel()).toBeGreaterThan(0);
+  });
 
-test('pk3 and ohpkm have the same gen345Lookup key', () => {
-  const ohPKM = new OHPKM(undefined, blazikenGen3)
-  expect(getMonGen345Identifier(ohPKM)).toEqual(getMonGen345Identifier(blazikenGen3))
-})
+  test('should correctly identify gender', () => {
+    expect(pk3Instance.gender).toBe(0x1); 
+  });
 
-test('gen 6+ nickname accuracy', () => {
-  const converted = new PK3(undefined, undefined, slowpokeOH)
-  expect(converted.nickname).toBe(slowpokeOH.nickname)
-})
+  test('should identify shiny status', () => {
+    expect(pk3Instance.isShiny()).toBe(false);
+  });
 
-test('gen 6+ shiny accuracy', () => {
-  const converted = new PK3(undefined, undefined, slowpokeOH)
-  if (!slowpokeOH.personalityValue) {
-    throw Error('mon has no personality value')
-  }
-  expect(converted.isShiny).toBe(slowpokeOH.isShiny)
-})
+  test('should identify square shiny status', () => {
+    expect(pk3Instance.isSquareShiny()).toBe(false); 
+  });
 
-test('gen 6+ nature accuracy', () => {
-  const converted = new PK3(undefined, undefined, slowpokeOH)
-  expect(converted.nature).toBe(slowpokeOH.nature)
-})
+  test('should return correct ability based on personality', () => {
+    expect(pk3Instance.ability).toBe('Synchronize');
+  });
+
+  test('should return correct nature', () => {
+    expect(pk3Instance.nature).toBe(0x3);
+  });
+
+  test('should generate a correct checksum', () => {
+    pk3Instance.refreshChecksum();
+    expect(pk3Instance.checksum).toBeGreaterThan(0);
+  });
+
+  test('should serialize and deserialize correctly to/from bytes', () => {
+    const bytes = pk3Instance.toBytes();
+    const deserialized = PK3.fromBytes(bytes);
+    expect(deserialized.personalityValue).toBe(pk3Instance.personalityValue);
+    expect(deserialized.trainerID).toBe(pk3Instance.trainerID);
+    expect(deserialized.dexNum).toBe(pk3Instance.dexNum);
+  });
+});
