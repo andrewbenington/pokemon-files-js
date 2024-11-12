@@ -53,7 +53,7 @@ export interface AllPKMFields {
   handlerName?: string
   height?: number
   heldItemIndex: number
-  homeTracker?: ArrayBuffer
+  homeTracker?: Uint8Array
   hyperTraining?: types.HyperTrainStats
   isAlpha?: boolean
   isCurrentHandler?: boolean
@@ -69,14 +69,14 @@ export interface AllPKMFields {
     | types.MarkingsFourShapes
     | types.MarkingsSixShapesNoColor
     | types.MarkingsSixShapesWithColor
-  masterFlagsLA?: ArrayBuffer
+  masterFlagsLA?: Uint8Array
   metDate?: types.PKMDate | undefined
   metLevel?: number
   metLocationIndex?: number
   metLocationIndexDP?: number
   metLocationIndexPtHGSS?: number
   metTimeOfDay?: number
-  moveFlagsLA?: ArrayBuffer
+  moveFlagsLA?: Uint8Array
   movePP: number[]
   movePPUps: number[]
   moves: number[]
@@ -91,7 +91,7 @@ export interface AllPKMFields {
   region?: number
   relearnMoves?: number[]
   resortEventStatus?: number
-  ribbonBytes?: ArrayBuffer
+  ribbonBytes?: Uint8Array
   ribbons?: string[]
   sanity?: number
   scale?: number
@@ -109,10 +109,10 @@ export interface AllPKMFields {
   superTrainingFlags?: number
   teraTypeOriginal?: number
   teraTypeOverride?: number
-  tmFlagsBDSP?: ArrayBuffer
-  tmFlagsSV?: ArrayBuffer
-  tmFlagsSVDLC?: ArrayBuffer
-  trFlagsSwSh?: ArrayBuffer
+  tmFlagsBDSP?: Uint8Array
+  tmFlagsSV?: Uint8Array
+  tmFlagsSVDLC?: Uint8Array
+  trFlagsSwSh?: Uint8Array
   trainerAffection?: number
   trainerFriendship?: number
   trainerGender: boolean
@@ -121,7 +121,7 @@ export interface AllPKMFields {
   trainerName: string
   trainingBag?: number
   trainingBagHits?: number
-  tutorFlagsLA?: ArrayBuffer
+  tutorFlagsLA?: Uint8Array
   type1?: number
   type2?: number
   unknownA0?: number

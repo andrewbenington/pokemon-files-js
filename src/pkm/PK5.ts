@@ -44,7 +44,7 @@ export class PK5 {
   formeNum: number
   nature: number
   isNsPokemon: boolean
-  ribbonBytes: ArrayBuffer
+  ribbonBytes: Uint8Array
   gameOfOrigin: number
   eggDate: types.PKMDate | undefined
   metDate: types.PKMDate | undefined
@@ -199,7 +199,7 @@ export class PK5 {
       this.formeNum = other.formeNum
       this.nature = other.nature ?? 0
       this.isNsPokemon = other.isNsPokemon ?? false
-      this.ribbonBytes = other.ribbonBytes ?? new ArrayBuffer(4)
+      this.ribbonBytes = other.ribbonBytes ?? new Uint8Array(4)
       this.gameOfOrigin = other.gameOfOrigin
       this.eggDate = other.eggDate ?? {
         month: new Date().getMonth(),

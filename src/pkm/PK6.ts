@@ -40,7 +40,7 @@ export class PK6 {
   markings: types.MarkingsSixShapesNoColor
   pokerusByte: number
   superTrainingFlags: number
-  ribbonBytes: ArrayBuffer
+  ribbonBytes: Uint8Array
   contestMemoryCount: number
   battleMemoryCount: number
   superTrainingDistFlags: number
@@ -241,7 +241,7 @@ export class PK6 {
       }
       this.pokerusByte = other.pokerusByte ?? 0
       this.superTrainingFlags = other.superTrainingFlags ?? 0
-      this.ribbonBytes = other.ribbonBytes ?? new ArrayBuffer(4)
+      this.ribbonBytes = other.ribbonBytes ?? new Uint8Array(4)
       this.contestMemoryCount = other.contestMemoryCount ?? 0
       this.battleMemoryCount = other.battleMemoryCount ?? 0
       this.superTrainingDistFlags = other.superTrainingDistFlags ?? 0

@@ -48,7 +48,7 @@ export class PK4 {
   isNicknamed: boolean
   formeNum: number
   shinyLeaves: number
-  ribbonBytes: ArrayBuffer
+  ribbonBytes: Uint8Array
   gameOfOrigin: number
   eggDate: types.PKMDate | undefined
   metDate: types.PKMDate | undefined
@@ -222,7 +222,7 @@ export class PK4 {
       this.isNicknamed = other.isNicknamed ?? false
       this.formeNum = other.formeNum
       this.shinyLeaves = other.shinyLeaves ?? 0
-      this.ribbonBytes = other.ribbonBytes ?? new ArrayBuffer(4)
+      this.ribbonBytes = other.ribbonBytes ?? new Uint8Array(4)
       this.gameOfOrigin = other.gameOfOrigin
       this.eggDate = other.eggDate ?? {
         month: new Date().getMonth(),

@@ -53,7 +53,7 @@ export class PK3 {
   ivs: types.Stats
   isEgg: boolean
   isNicknamed: boolean
-  ribbonBytes: ArrayBuffer
+  ribbonBytes: Uint8Array
   isFatefulEncounter: boolean
   statusCondition: number
   currentHP: number
@@ -184,7 +184,7 @@ export class PK3 {
       }
       this.isEgg = other.isEgg ?? false
       this.isNicknamed = other.isNicknamed ?? false
-      this.ribbonBytes = other.ribbonBytes ?? new ArrayBuffer(4)
+      this.ribbonBytes = other.ribbonBytes ?? new Uint8Array(4)
       this.isFatefulEncounter = other.isFatefulEncounter ?? false
       this.statusCondition = other.statusCondition ?? 0
       this.currentHP = other.currentHP
@@ -321,13 +321,13 @@ export class PK3 {
     const shuffledBytes = encryption.shuffleBlocksGen3(this.toBytes())
     return encryption.decryptByteArrayGen3(shuffledBytes)
   }
-  
+
   public getLevel() {
     return getLevelGen3Onward(this.dexNum, this.exp)
   }
 
   // Checks to see if Pokemon is Valid and Real
-  public isValid(): boolean { 
+  public isValid(): boolean {
     if (this.calculateChecksum() !== this.checksum) {
       return false;
     }

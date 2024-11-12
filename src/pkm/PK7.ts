@@ -40,7 +40,7 @@ export class PK7 {
   resortEventStatus: number
   pokerusByte: number
   superTrainingFlags: number
-  ribbonBytes: ArrayBuffer
+  ribbonBytes: Uint8Array
   contestMemoryCount: number
   battleMemoryCount: number
   superTrainingDistFlags: number
@@ -239,7 +239,7 @@ export class PK7 {
       this.resortEventStatus = other.resortEventStatus ?? 0
       this.pokerusByte = other.pokerusByte ?? 0
       this.superTrainingFlags = other.superTrainingFlags ?? 0
-      this.ribbonBytes = other.ribbonBytes ?? new ArrayBuffer(4)
+      this.ribbonBytes = other.ribbonBytes ?? new Uint8Array(4)
       this.contestMemoryCount = other.contestMemoryCount ?? 0
       this.battleMemoryCount = other.battleMemoryCount ?? 0
       this.superTrainingDistFlags = other.superTrainingDistFlags ?? 0

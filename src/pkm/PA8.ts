@@ -39,7 +39,7 @@ export class PA8 {
   evs: types.Stats
   contest: types.ContestStats
   pokerusByte: number
-  ribbonBytes: ArrayBuffer
+  ribbonBytes: Uint8Array
   contestMemoryCount: number
   battleMemoryCount: number
   alphaMove: number
@@ -85,10 +85,10 @@ export class PA8 {
   metLocationIndex: number
   metLevel: number
   hyperTraining: types.HyperTrainStats
-  moveFlagsLA: ArrayBuffer
-  homeTracker: ArrayBuffer
-  tutorFlagsLA: ArrayBuffer
-  masterFlagsLA: ArrayBuffer
+  moveFlagsLA: Uint8Array
+  homeTracker: Uint8Array
+  tutorFlagsLA: Uint8Array
+  masterFlagsLA: Uint8Array
   favorite: boolean
   canGigantamax: boolean
   isAlpha: boolean
@@ -246,7 +246,7 @@ export class PA8 {
         sheen: 0,
       }
       this.pokerusByte = other.pokerusByte ?? 0
-      this.ribbonBytes = other.ribbonBytes ?? new ArrayBuffer(8)
+      this.ribbonBytes = other.ribbonBytes ?? new Uint8Array(8)
       this.contestMemoryCount = other.contestMemoryCount ?? 0
       this.battleMemoryCount = other.battleMemoryCount ?? 0
       this.alphaMove = other.alphaMove ?? 0
@@ -329,10 +329,10 @@ export class PA8 {
         spd: false,
         spe: false,
       }
-      this.moveFlagsLA = other.moveFlagsLA ?? new ArrayBuffer(14)
-      this.homeTracker = other.homeTracker ?? new ArrayBuffer(8)
-      this.tutorFlagsLA = other.tutorFlagsLA ?? new ArrayBuffer(8)
-      this.masterFlagsLA = other.masterFlagsLA ?? new ArrayBuffer(8)
+      this.moveFlagsLA = other.moveFlagsLA ?? new Uint8Array(14)
+      this.homeTracker = other.homeTracker ?? new Uint8Array(8)
+      this.tutorFlagsLA = other.tutorFlagsLA ?? new Uint8Array(8)
+      this.masterFlagsLA = other.masterFlagsLA ?? new Uint8Array(8)
       this.favorite = other.favorite ?? false
       this.canGigantamax = other.canGigantamax ?? false
       this.isAlpha = other.isAlpha ?? false

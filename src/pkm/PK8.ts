@@ -40,7 +40,7 @@ export class PK8 {
   evs: types.Stats
   contest: types.ContestStats
   pokerusByte: number
-  ribbonBytes: ArrayBuffer
+  ribbonBytes: Uint8Array
   contestMemoryCount: number
   battleMemoryCount: number
   sociability: number
@@ -80,8 +80,8 @@ export class PK8 {
   metLocationIndex: number
   ball: number
   metLevel: number
-  trFlagsSwSh: ArrayBuffer
-  homeTracker: ArrayBuffer
+  trFlagsSwSh: Uint8Array
+  homeTracker: Uint8Array
   ribbons: string[]
   isCurrentHandler: boolean
   handlerMemory: types.Memory
@@ -233,7 +233,7 @@ export class PK8 {
         sheen: 0,
       }
       this.pokerusByte = other.pokerusByte ?? 0
-      this.ribbonBytes = other.ribbonBytes ?? new ArrayBuffer(8)
+      this.ribbonBytes = other.ribbonBytes ?? new Uint8Array(8)
       this.contestMemoryCount = other.contestMemoryCount ?? 0
       this.battleMemoryCount = other.battleMemoryCount ?? 0
       this.sociability = other.sociability ?? 0
@@ -296,8 +296,8 @@ export class PK8 {
         this.ball = Ball.Poke
       }
       this.metLevel = other.metLevel ?? 0
-      this.trFlagsSwSh = other.trFlagsSwSh ?? new ArrayBuffer(14)
-      this.homeTracker = other.homeTracker ?? new ArrayBuffer(8)
+      this.trFlagsSwSh = other.trFlagsSwSh ?? new Uint8Array(14)
+      this.homeTracker = other.homeTracker ?? new Uint8Array(8)
       this.ribbons = filterRibbons(other.ribbons ?? [], [ModernRibbons], 'Slump Mark') ?? []
       this.isCurrentHandler = other.isCurrentHandler ?? false
       this.handlerMemory = other.handlerMemory ?? {

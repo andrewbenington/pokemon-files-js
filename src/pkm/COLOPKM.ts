@@ -40,7 +40,7 @@ export class COLOPKM {
   secretID: number
   trainerName: string
   nickname: string
-  ribbonBytes: ArrayBuffer
+  ribbonBytes: Uint8Array
   exp: number
   statLevel: number
   moves: number[]
@@ -128,7 +128,7 @@ export class COLOPKM {
       this.secretID = other.secretID
       this.trainerName = other.trainerName
       this.nickname = other.nickname
-      this.ribbonBytes = other.ribbonBytes ?? new ArrayBuffer(4)
+      this.ribbonBytes = other.ribbonBytes ?? new Uint8Array(4)
       this.exp = other.exp
       this.statLevel = other.statLevel ?? 0
       this.moves = other.moves.filter((_, i) => other.moves[i] <= COLOPKM.maxValidMove())

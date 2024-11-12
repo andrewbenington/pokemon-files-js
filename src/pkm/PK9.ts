@@ -40,13 +40,13 @@ export class PK9 {
   evs: types.Stats
   contest: types.ContestStats
   pokerusByte: number
-  ribbonBytes: ArrayBuffer
+  ribbonBytes: Uint8Array
   contestMemoryCount: number
   battleMemoryCount: number
   height: number
   weight: number
   scale: number
-  tmFlagsSVDLC: ArrayBuffer
+  tmFlagsSVDLC: Uint8Array
   nickname: string
   moves: number[]
   movePP: number[]
@@ -82,8 +82,8 @@ export class PK9 {
   ball: number
   metLevel: number
   hyperTraining: types.HyperTrainStats
-  homeTracker: ArrayBuffer
-  tmFlagsSV: ArrayBuffer
+  homeTracker: Uint8Array
+  tmFlagsSV: Uint8Array
   ribbons: string[]
   trainerGender: boolean
 
@@ -227,13 +227,13 @@ export class PK9 {
         sheen: 0,
       }
       this.pokerusByte = other.pokerusByte ?? 0
-      this.ribbonBytes = other.ribbonBytes ?? new ArrayBuffer(8)
+      this.ribbonBytes = other.ribbonBytes ?? new Uint8Array(8)
       this.contestMemoryCount = other.contestMemoryCount ?? 0
       this.battleMemoryCount = other.battleMemoryCount ?? 0
       this.height = other.height ?? 0
       this.weight = other.weight ?? 0
       this.scale = other.scale ?? 0
-      this.tmFlagsSVDLC = other.tmFlagsSVDLC ?? new ArrayBuffer(13)
+      this.tmFlagsSVDLC = other.tmFlagsSVDLC ?? new Uint8Array(13)
       this.nickname = other.nickname
       this.moves = other.moves.filter((_, i) => other.moves[i] <= PK9.maxValidMove())
       this.movePP = adjustMovePPBetweenFormats(this, other).filter(
@@ -309,8 +309,8 @@ export class PK9 {
         spd: false,
         spe: false,
       }
-      this.homeTracker = other.homeTracker ?? new ArrayBuffer(8)
-      this.tmFlagsSV = other.tmFlagsSV ?? new ArrayBuffer(22)
+      this.homeTracker = other.homeTracker ?? new Uint8Array(8)
+      this.tmFlagsSV = other.tmFlagsSV ?? new Uint8Array(22)
       this.ribbons = filterRibbons(other.ribbons ?? [], [ModernRibbons], '') ?? []
       this.trainerGender = other.trainerGender
     }
