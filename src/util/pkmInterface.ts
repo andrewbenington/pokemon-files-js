@@ -129,8 +129,9 @@ export interface AllPKMFields {
   weight?: number
   heldItemName: string
   language: string
+  isShadow?: boolean
   getLevel: () => number
   isShiny: () => boolean
   isSquareShiny: () => boolean
-  toBytes: () => ArrayBuffer
+  toBytes: (options?: types.ToBytesOptions) => ArrayBuffer
 }

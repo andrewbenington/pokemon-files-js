@@ -316,11 +316,11 @@ export class PK9 {
     }
   }
 
-  static fromBytes(buffer: ArrayBufferLike): PK9 {
+  static fromBytes(buffer: ArrayBuffer): PK9 {
     return new PK9(buffer)
   }
 
-  toBytes(options?: types.ToBytesOptions): ArrayBuffer {
+  toBytes(): ArrayBuffer {
     const buffer = new ArrayBuffer(344)
     const dataView = new DataView(buffer)
 

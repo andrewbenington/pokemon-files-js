@@ -197,7 +197,7 @@ export class PK3 {
     }
   }
 
-  static fromBytes(buffer: ArrayBufferLike): PK3 {
+  static fromBytes(buffer: ArrayBuffer): PK3 {
     return new PK3(buffer)
   }
 
@@ -329,7 +329,7 @@ export class PK3 {
   // Checks to see if Pokemon is Valid and Real
   public isValid(): boolean {
     if (this.calculateChecksum() !== this.checksum) {
-      return false;
+      return false
     }
 
     if (this.dexNum !== 0) {

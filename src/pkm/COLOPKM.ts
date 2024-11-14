@@ -178,11 +178,11 @@ export class COLOPKM {
     }
   }
 
-  static fromBytes(buffer: ArrayBufferLike): COLOPKM {
+  static fromBytes(buffer: ArrayBuffer): COLOPKM {
     return new COLOPKM(buffer)
   }
 
-  toBytes(options?: types.ToBytesOptions): ArrayBuffer {
+  toBytes(): ArrayBuffer {
     const buffer = new ArrayBuffer(312)
     const dataView = new DataView(buffer)
 

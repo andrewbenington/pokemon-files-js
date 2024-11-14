@@ -261,7 +261,7 @@ export class PB7 {
     }
   }
 
-  static fromBytes(buffer: ArrayBufferLike): PB7 {
+  static fromBytes(buffer: ArrayBuffer): PB7 {
     return new PB7(buffer)
   }
 

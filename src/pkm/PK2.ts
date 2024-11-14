@@ -142,7 +142,7 @@ export class PK2 {
     }
   }
 
-  static fromBytes(buffer: ArrayBufferLike): PK2 {
+  static fromBytes(buffer: ArrayBuffer): PK2 {
     return new PK2(buffer)
   }
 

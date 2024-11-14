@@ -324,11 +324,11 @@ export class PB8 {
     }
   }
 
-  static fromBytes(buffer: ArrayBufferLike): PB8 {
+  static fromBytes(buffer: ArrayBuffer): PB8 {
     return new PB8(buffer)
   }
 
-  toBytes(options?: types.ToBytesOptions): ArrayBuffer {
+  toBytes(): ArrayBuffer {
     const buffer = new ArrayBuffer(344)
     const dataView = new DataView(buffer)
 

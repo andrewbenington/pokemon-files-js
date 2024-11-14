@@ -233,7 +233,7 @@ export class PK5 {
     }
   }
 
-  static fromBytes(buffer: ArrayBufferLike): PK5 {
+  static fromBytes(buffer: ArrayBuffer): PK5 {
     return new PK5(buffer)
   }
 

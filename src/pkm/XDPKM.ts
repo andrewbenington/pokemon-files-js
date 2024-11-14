@@ -175,11 +175,11 @@ export class XDPKM {
     }
   }
 
-  static fromBytes(buffer: ArrayBufferLike): XDPKM {
+  static fromBytes(buffer: ArrayBuffer): XDPKM {
     return new XDPKM(buffer)
   }
 
-  toBytes(options?: types.ToBytesOptions): ArrayBuffer {
+  toBytes(): ArrayBuffer {
     const buffer = new ArrayBuffer(196)
     const dataView = new DataView(buffer)
 

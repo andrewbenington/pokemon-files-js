@@ -126,7 +126,7 @@ export class PK1 {
     }
   }
 
-  static fromBytes(buffer: ArrayBufferLike): PK1 {
+  static fromBytes(buffer: ArrayBuffer): PK1 {
     return new PK1(buffer)
   }
 

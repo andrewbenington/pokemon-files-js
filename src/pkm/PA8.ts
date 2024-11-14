@@ -342,11 +342,11 @@ export class PA8 {
     }
   }
 
-  static fromBytes(buffer: ArrayBufferLike): PA8 {
+  static fromBytes(buffer: ArrayBuffer): PA8 {
     return new PA8(buffer)
   }
 
-  toBytes(options?: types.ToBytesOptions): ArrayBuffer {
+  toBytes(): ArrayBuffer {
     const buffer = new ArrayBuffer(376)
     const dataView = new DataView(buffer)
 
