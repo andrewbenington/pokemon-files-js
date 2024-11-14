@@ -332,11 +332,7 @@ export class PK3 {
       return false
     }
 
-    if (this.dexNum !== 0) {
-      return true
-    }
-
-    return true
+    return this.dexNum > 0 && this.dexNum <= NationalDex.Deoxys
   }
 
   isShiny() {
