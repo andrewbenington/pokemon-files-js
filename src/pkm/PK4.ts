@@ -7,6 +7,7 @@ import {
   Languages,
   NatureToString,
 } from 'pokemon-resources'
+
 import * as byteLogic from '../util/byteLogic'
 import * as encryption from '../util/encryption'
 import { genderFromPID } from '../util/genderCalc'

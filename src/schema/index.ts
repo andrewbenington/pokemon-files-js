@@ -1,5 +1,4 @@
 import COLOPKMSchema from './COLOPKM.json'
-import OHPKMSchema from './OHPKM.json'
 import PA8Schema from './PA8.json'
 import PB7Schema from './PB7.json'
 import PB8Schema from './PB8.json'
@@ -15,7 +14,6 @@ import PK9Schema from './PK9.json'
 import XDPKMSchema from './XDPKM.json'
 
 export const FileSchemas = {
-  OHPKM: OHPKMSchema,
   PK1: PK1Schema,
   PK2: PK2Schema,
   PK3: PK3Schema,

@@ -8,7 +8,7 @@
     "strict": true,
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "lib": ["dom", "es2021"],
+    "lib": ["dom", "es2023"],
     "types": ["node", "jest"]
   },
   "include": ["./**/*.ts", "./**/*.mts", "./*.ts"]

@@ -1,7 +1,9 @@
 import { GameOfOrigin, isGameBoy, Moves, Nature } from 'pokemon-resources'
 import { getGenderRatio, NationalDex } from 'pokemon-species-data'
 import Prando from 'prando'
+
 import { PKM } from '../pkm'
+
 import { AllPKMFields } from './pkmInterface'
 
 export function getGen3MiscFlags(pokemon: PKM): number {

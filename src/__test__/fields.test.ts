@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
-import { COLOPKM, PA8, PB8, PK1, PK2, PK3, PK4, PK5, PK6, PK7, PK8, PK9, XDPKM } from "../pkm"
+
+import { COLOPKM, PA8, PB8, PK1, PK2, PK3, PK4, PK5, PK6, PK7, PK8, PK9, XDPKM } from '../pkm'
 // ;(global as any).TextDecoder = TextDecoder
 
 // test('gen 3 stat calculations', () => {
@@ -17,7 +18,6 @@ import { COLOPKM, PA8, PB8, PK1, PK2, PK3, PK4, PK5, PK6, PK7, PK8, PK9, XDPKM }
 //     spd: 154,
 //   });
 // });
-
 
 // test('gen 3 EVs are updated', () => {
 //   const emeraldPKM = new PK3(blazikenOH);
@@ -88,8 +88,10 @@ import { COLOPKM, PA8, PB8, PK1, PK2, PK3, PK4, PK5, PK6, PK7, PK8, PK9, XDPKM }
 //   expect(blazikenPK3.bytes).toEqual(PK3PKM.bytes)
 // });
 
-describe("pk1 fields persist after read/write", () => {
-  const files = fs.readdirSync('src/__test__/PKMFiles/PK1').map(filename => path.join('src/__test__/PKMFiles/PK1', filename))
+describe('pk1 fields persist after read/write', () => {
+  const files = fs
+    .readdirSync('src/__test__/PKMFiles/PK1')
+    .map((filename) => path.join('src/__test__/PKMFiles/PK1', filename))
   for (const file of files) {
     test(`file: ${file}`, () => {
       const bytes = fs.readFileSync(file)
@@ -100,8 +102,10 @@ describe("pk1 fields persist after read/write", () => {
   }
 })
 
-describe("pk2 fields persist after read/write", () => {
-  const files = fs.readdirSync('src/__test__/PKMFiles/PK2').map(filename => path.join('src/__test__/PKMFiles/PK2', filename))
+describe('pk2 fields persist after read/write', () => {
+  const files = fs
+    .readdirSync('src/__test__/PKMFiles/PK2')
+    .map((filename) => path.join('src/__test__/PKMFiles/PK2', filename))
   for (const file of files) {
     test(`file: ${file}`, () => {
       const bytes = fs.readFileSync(file)
@@ -112,8 +116,10 @@ describe("pk2 fields persist after read/write", () => {
   }
 })
 
-describe("pk3 fields persist after read/write", () => {
-  const files = fs.readdirSync('src/__test__/PKMFiles/PK3').map(filename => path.join('src/__test__/PKMFiles/PK3', filename))
+describe('pk3 fields persist after read/write', () => {
+  const files = fs
+    .readdirSync('src/__test__/PKMFiles/PK3')
+    .map((filename) => path.join('src/__test__/PKMFiles/PK3', filename))
   for (const file of files) {
     test(`file: ${file}`, () => {
       const bytes = fs.readFileSync(file)
@@ -124,8 +130,10 @@ describe("pk3 fields persist after read/write", () => {
   }
 })
 
-describe("colopkm fields persist after read/write", () => {
-  const files = fs.readdirSync('src/__test__/PKMFiles/COLOPKM').map(filename => path.join('src/__test__/PKMFiles/COLOPKM', filename))
+describe('colopkm fields persist after read/write', () => {
+  const files = fs
+    .readdirSync('src/__test__/PKMFiles/COLOPKM')
+    .map((filename) => path.join('src/__test__/PKMFiles/COLOPKM', filename))
   for (const file of files) {
     test(`file: ${file}`, () => {
       const bytes = fs.readFileSync(file)
@@ -136,8 +144,10 @@ describe("colopkm fields persist after read/write", () => {
   }
 })
 
-describe("xdpkm fields persist after read/write", () => {
-  const files = fs.readdirSync('src/__test__/PKMFiles/XDPKM').map(filename => path.join('src/__test__/PKMFiles/XDPKM', filename))
+describe('xdpkm fields persist after read/write', () => {
+  const files = fs
+    .readdirSync('src/__test__/PKMFiles/XDPKM')
+    .map((filename) => path.join('src/__test__/PKMFiles/XDPKM', filename))
   for (const file of files) {
     test(`file: ${file}`, () => {
       const bytes = fs.readFileSync(file)
@@ -148,8 +158,10 @@ describe("xdpkm fields persist after read/write", () => {
   }
 })
 
-describe("pk4 fields persist after read/write", () => {
-  const files = fs.readdirSync('src/__test__/PKMFiles/PK4').map(filename => path.join('src/__test__/PKMFiles/PK4', filename))
+describe('pk4 fields persist after read/write', () => {
+  const files = fs
+    .readdirSync('src/__test__/PKMFiles/PK4')
+    .map((filename) => path.join('src/__test__/PKMFiles/PK4', filename))
   for (const file of files) {
     test(`file: ${file}`, () => {
       const bytes = fs.readFileSync(file)
@@ -160,8 +172,10 @@ describe("pk4 fields persist after read/write", () => {
   }
 })
 
-describe("pk5 fields persist after read/write", () => {
-  const files = fs.readdirSync('src/__test__/PKMFiles/PK5').map(filename => path.join('src/__test__/PKMFiles/PK5', filename))
+describe('pk5 fields persist after read/write', () => {
+  const files = fs
+    .readdirSync('src/__test__/PKMFiles/PK5')
+    .map((filename) => path.join('src/__test__/PKMFiles/PK5', filename))
   for (const file of files) {
     test(`file: ${file}`, () => {
       const bytes = fs.readFileSync(file)
@@ -172,8 +186,10 @@ describe("pk5 fields persist after read/write", () => {
   }
 })
 
-describe("pk6 fields persist after read/write", () => {
-  const files = fs.readdirSync('src/__test__/PKMFiles/PK6').map(filename => path.join('src/__test__/PKMFiles/PK6', filename))
+describe('pk6 fields persist after read/write', () => {
+  const files = fs
+    .readdirSync('src/__test__/PKMFiles/PK6')
+    .map((filename) => path.join('src/__test__/PKMFiles/PK6', filename))
   for (const file of files) {
     test(`file: ${file}`, () => {
       const bytes = fs.readFileSync(file)
@@ -184,8 +200,10 @@ describe("pk6 fields persist after read/write", () => {
   }
 })
 
-describe("pk7 fields persist after read/write", () => {
-  const files = fs.readdirSync('src/__test__/PKMFiles/PK7').map(filename => path.join('src/__test__/PKMFiles/PK7', filename))
+describe('pk7 fields persist after read/write', () => {
+  const files = fs
+    .readdirSync('src/__test__/PKMFiles/PK7')
+    .map((filename) => path.join('src/__test__/PKMFiles/PK7', filename))
   for (const file of files) {
     test(`file: ${file}`, () => {
       const bytes = fs.readFileSync(file)
@@ -196,8 +214,10 @@ describe("pk7 fields persist after read/write", () => {
   }
 })
 
-describe("pk8 fields persist after read/write", () => {
-  const files = fs.readdirSync('src/__test__/PKMFiles/PK8').map(filename => path.join('src/__test__/PKMFiles/PK8', filename))
+describe('pk8 fields persist after read/write', () => {
+  const files = fs
+    .readdirSync('src/__test__/PKMFiles/PK8')
+    .map((filename) => path.join('src/__test__/PKMFiles/PK8', filename))
   for (const file of files) {
     test(`file: ${file}`, () => {
       const bytes = fs.readFileSync(file)
@@ -208,8 +228,10 @@ describe("pk8 fields persist after read/write", () => {
   }
 })
 
-describe("pb8 fields persist after read/write", () => {
-  const files = fs.readdirSync('src/__test__/PKMFiles/PB8').map(filename => path.join('src/__test__/PKMFiles/PB8', filename))
+describe('pb8 fields persist after read/write', () => {
+  const files = fs
+    .readdirSync('src/__test__/PKMFiles/PB8')
+    .map((filename) => path.join('src/__test__/PKMFiles/PB8', filename))
   for (const file of files) {
     test(`file: ${file}`, () => {
       const bytes = fs.readFileSync(file)
@@ -220,8 +242,10 @@ describe("pb8 fields persist after read/write", () => {
   }
 })
 
-describe("pa8 fields persist after read/write", () => {
-  const files = fs.readdirSync('src/__test__/PKMFiles/PA8').map(filename => path.join('src/__test__/PKMFiles/PA8', filename))
+describe('pa8 fields persist after read/write', () => {
+  const files = fs
+    .readdirSync('src/__test__/PKMFiles/PA8')
+    .map((filename) => path.join('src/__test__/PKMFiles/PA8', filename))
   for (const file of files) {
     test(`file: ${file}`, () => {
       const bytes = fs.readFileSync(file)
@@ -232,8 +256,10 @@ describe("pa8 fields persist after read/write", () => {
   }
 })
 
-describe("pk9 fields persist after read/write", () => {
-  const files = fs.readdirSync('src/__test__/PKMFiles/PK9').map(filename => path.join('src/__test__/PKMFiles/PK9', filename))
+describe('pk9 fields persist after read/write', () => {
+  const files = fs
+    .readdirSync('src/__test__/PKMFiles/PK9')
+    .map((filename) => path.join('src/__test__/PKMFiles/PK9', filename))
   for (const file of files) {
     test(`file: ${file}`, () => {
       const bytes = fs.readFileSync(file)
@@ -243,8 +269,6 @@ describe("pk9 fields persist after read/write", () => {
     })
   }
 })
-
-
 
 // test('gen 6+ nickname accuracy', () => {
 //   const converted = new PK3(slowpokePK7);

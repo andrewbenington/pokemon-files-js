@@ -1,4 +1,5 @@
 import { Gen3ContestRibbons } from 'pokemon-resources'
+
 import { uIntFromBufferBits, uIntToBufferBits } from './byteLogic'
 
 export function gen3ContestRibbonsFromBuffer(

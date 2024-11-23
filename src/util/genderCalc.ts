@@ -1,4 +1,5 @@
 import { getGenderRatio } from 'pokemon-species-data'
+
 import { StatsPreSplit } from './types'
 
 const gen3To5MaleThreshold: { [key: number]: number } = {
