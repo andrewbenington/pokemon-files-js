@@ -17,6 +17,9 @@ import * as types from '../util/types'
 import { adjustMovePPBetweenFormats } from '../util/util'
 
 export class PB7 {
+  static getName() {
+    return 'PB7'
+  }
   format: 'PB7' = 'PB7'
   encryptionConstant: number
   dexNum: number

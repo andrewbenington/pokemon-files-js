@@ -12,6 +12,9 @@ import * as types from '../util/types'
 import { adjustMovePPBetweenFormats } from '../util/util'
 
 export class PK2 {
+  static getName() {
+    return 'PK2'
+  }
   format: 'PK2' = 'PK2'
   gameOfOrigin: number
   languageIndex: number

@@ -1,6 +1,6 @@
 {
   "name": "pokemon-files",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -26,7 +26,7 @@
   },
   "homepage": "https://github.com/andrewbenington/pokemon-files-js#readme",
   "dependencies": {
-    "pokemon-resources": "^1.0.10",
+    "pokemon-resources": "^1.0.11",
     "pokemon-species-data": "^0.4.2",
     "prando": "^6.0.1"
   },

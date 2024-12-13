@@ -13,6 +13,9 @@ import * as types from '../util/types'
 import { adjustMovePPBetweenFormats } from '../util/util'
 
 export class PK1 {
+  static getName() {
+    return 'PK1'
+  }
   format: 'PK1' = 'PK1'
   gameOfOrigin: number
   personalityValue: number

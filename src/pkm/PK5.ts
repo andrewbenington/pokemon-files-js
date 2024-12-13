@@ -20,6 +20,9 @@ import * as types from '../util/types'
 import { adjustMovePPBetweenFormats } from '../util/util'
 
 export class PK5 {
+  static getName() {
+    return 'PK5'
+  }
   format: 'PK5' = 'PK5'
   personalityValue: number
   dexNum: number

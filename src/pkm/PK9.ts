@@ -20,6 +20,9 @@ import * as types from '../util/types'
 import { adjustMovePPBetweenFormats } from '../util/util'
 
 export class PK9 {
+  static getName() {
+    return 'PK9'
+  }
   format: 'PK9' = 'PK9'
   encryptionConstant: number
   checksum: number

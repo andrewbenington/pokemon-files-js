@@ -26,6 +26,9 @@ import * as types from '../util/types'
 import { adjustMovePPBetweenFormats } from '../util/util'
 
 export class COLOPKM {
+  static getName() {
+    return 'COLOPKM'
+  }
   format: 'COLOPKM' = 'COLOPKM'
   dexNum: number
   personalityValue: number

@@ -28,6 +28,9 @@ function validDPLocation(index: number): boolean {
 }
 
 export class PK4 {
+  static getName() {
+    return 'PK4'
+  }
   format: 'PK4' = 'PK4'
   personalityValue: number
   dexNum: number

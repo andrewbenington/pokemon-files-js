@@ -26,6 +26,9 @@ import * as types from '../util/types'
 import { adjustMovePPBetweenFormats } from '../util/util'
 
 export class XDPKM {
+  static getName() {
+    return 'XDPKM'
+  }
   format: 'XDPKM' = 'XDPKM'
   dexNum: number
   heldItemIndex: number

@@ -20,6 +20,9 @@ import * as types from '../util/types'
 import { adjustMovePPBetweenFormats } from '../util/util'
 
 export class PK7 {
+  static getName() {
+    return 'PK7'
+  }
   format: 'PK7' = 'PK7'
   encryptionConstant: number
   sanity: number

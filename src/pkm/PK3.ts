@@ -31,6 +31,9 @@ import {
 } from '../util/util'
 
 export class PK3 {
+  static getName() {
+    return 'PK3'
+  }
   format: 'PK3' = 'PK3'
   personalityValue: number
   trainerID: number
