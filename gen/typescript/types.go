@@ -10,9 +10,6 @@ import (
 // Field represents a field with its properties and TypeScript type
 type TypeScriptField struct {
 	schema.Field
-	NumBytes        int
-	ByteOffset      int
-	BitOffset       int
 	TypescriptType  string
 	NameCapitalized string
 }
@@ -79,20 +76,13 @@ func TypeScriptFieldFromSchemaField(sf schema.Field) (*TypeScriptField, error) {
 	if sf.ByteOffset == nil {
 		return nil, fmt.Errorf("ByteOffset not present")
 	}
-	tf.ByteOffset = *sf.ByteOffset
-	if sf.BitOffset != nil {
-		tf.BitOffset = *sf.BitOffset
-	}
 
 	if sf.Type == "boolean" {
 		if sf.BitOffset == nil {
 			return nil, fmt.Errorf("BitOffset not present in boolean field")
 		}
-		tf.BitOffset = *sf.BitOffset
 	} else if sf.NumBytes == nil {
 		return nil, fmt.Errorf("NumBytes not present in non-boolean field")
-	} else {
-		tf.NumBytes = *sf.NumBytes
 	}
 
 	if sf.Type == "tuple" {

@@ -1,5 +1,7 @@
 package schema
 
+import "fmt"
+
 // Field represents a field with its properties
 type Field struct {
 	Name            string       `json:"Name"`
@@ -18,6 +20,13 @@ type Field struct {
 	LengthCheck     int          `json:"lengthCheck"`
 	NoWrite         bool         `json:"noWrite"`
 	Default         *string      `json:"default"`
+}
+
+func (f *Field) ToString() string {
+	if f.Type == "tuple" {
+		return fmt.Sprintf("Field: %s (%s[%d])", f.Name, f.TupleType, f.TupleLength)
+	}
+	return fmt.Sprintf("Field: %s (%s)", f.Name, f.Type)
 }
 
 type Conversion struct {

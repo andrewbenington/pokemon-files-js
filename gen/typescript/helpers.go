@@ -65,59 +65,82 @@ func fieldToBufferFunction(field TypeScriptField, endianness string, encoding st
 	return toBufferFunction(field, endianness, encoding, fmt.Sprintf("this.%s", field.Name))
 }
 
+func panicIfNilNumBytes(field TypeScriptField, caller string) {
+	if field.NumBytes == nil {
+		panic(fmt.Sprintf("%s: NumBytes is nil for %s", caller, field.ToString()))
+	}
+}
+
+func panicIfNilByteOffset(field TypeScriptField, caller string) {
+	if field.ByteOffset == nil {
+		panic(fmt.Sprintf("%s: ByteOffset is nil for %s", caller, field.ToString()))
+	}
+}
+
+func panicIfNilBitOffset(field TypeScriptField, caller string) {
+	if field.BitOffset == nil {
+		panic(fmt.Sprintf("%s: BitOffset is nil for %s", caller, field.ToString()))
+	}
+}
+
 func toBufferFunction(field TypeScriptField, endianness string, encoding string, variableName string) string {
+	panicIfNilByteOffset(field, "toBufferFunction")
 	switch field.Type {
 	case "string":
-		return stringToBufferFunction(field.Name, field.ByteOffset, field.NumBytes, encoding, field.TerminateString)
+		panicIfNilNumBytes(field, "toBufferFunction")
+		return stringToBufferFunction(field.Name, *field.ByteOffset, *field.NumBytes, encoding, field.TerminateString)
 	case "number", "number | undefined":
-		if field.Field.NumBits != nil {
-			return fmt.Sprintf("byteLogic.uIntToBufferBits(dataView, %s, %d, %d, %d, %t)", variableName, field.ByteOffset, field.BitOffset, *field.Field.NumBits, endianness == "Little")
+		if field.NumBits != nil {
+			panicIfNilBitOffset(field, "toBufferFunction")
+			return fmt.Sprintf("byteLogic.uIntToBufferBits(dataView, %s, %d, %d, %d, %t)", variableName, *field.ByteOffset, *field.BitOffset, *field.NumBits, endianness == "Little")
 		}
-		return intToBufferFunction(field.NumBytes, field.ByteOffset, endianness, variableName)
+		panicIfNilNumBytes(field, "toBufferFunction")
+		return intToBufferFunction(*field.NumBytes, *field.ByteOffset, endianness, variableName)
 	case "boolean":
-		return fmt.Sprintf("byteLogic.setFlag(dataView, 0x%x, %d, %s)", field.ByteOffset, field.BitOffset, variableName)
+		return fmt.Sprintf("byteLogic.setFlag(dataView, 0x%x, %d, %s)", *field.ByteOffset, *field.BitOffset, variableName)
 	case "Uint8Array":
-		// fmt.Printf("%+v\n", field)
-		return fmt.Sprintf("new Uint8Array(buffer).set(new Uint8Array(%s.slice(0, %d)), 0x%x)", variableName, field.NumBytes, field.ByteOffset)
+		panicIfNilNumBytes(field, "toBufferFunction")
+		return fmt.Sprintf("new Uint8Array(buffer).set(new Uint8Array(%s.slice(0, %d)), 0x%x)", variableName, *field.NumBytes, *field.ByteOffset)
 	case "pokedate", "pokedate | undefined":
-		return fmt.Sprintf("types.writePKMDateToBytes(dataView, 0x%x, %s)", field.ByteOffset, variableName)
+		return fmt.Sprintf("types.writePKMDateToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
 	case "ivs30Bits":
-		return fmt.Sprintf("types.write30BitIVsToBytes(dataView, 0x%x, %s)", field.ByteOffset, variableName)
+		return fmt.Sprintf("types.write30BitIVsToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
 	case "stats":
-		return fmt.Sprintf("types.writeStatsToBytes(dataView, 0x%x, %s)", field.ByteOffset, variableName)
+		return fmt.Sprintf("types.writeStatsToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
 	case "statsPreSplit":
-		atkOffset := field.ByteOffset + field.NumBytes
-		defOffset := field.ByteOffset + field.NumBytes*2
-		speOffset := field.ByteOffset + field.NumBytes*3
-		spcOffset := field.ByteOffset + field.NumBytes*4
+		panicIfNilNumBytes(field, "toBufferFunction")
+		atkOffset := *field.ByteOffset + *field.NumBytes
+		defOffset := *field.ByteOffset + *field.NumBytes*2
+		speOffset := *field.ByteOffset + *field.NumBytes*3
+		spcOffset := *field.ByteOffset + *field.NumBytes*4
 		return fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n",
-			intToBufferFunction(2, field.ByteOffset, endianness, fmt.Sprintf("%s.hp", variableName)),
+			intToBufferFunction(2, *field.ByteOffset, endianness, fmt.Sprintf("%s.hp", variableName)),
 			intToBufferFunction(2, atkOffset, endianness, fmt.Sprintf("%s.atk", variableName)),
 			intToBufferFunction(2, defOffset, endianness, fmt.Sprintf("%s.def", variableName)),
 			intToBufferFunction(2, speOffset, endianness, fmt.Sprintf("%s.spe", variableName)),
 			intToBufferFunction(2, spcOffset, endianness, fmt.Sprintf("%s.spc", variableName)))
 	case "dvs":
-		return fmt.Sprintf("types.writeDVsToBytes(%s, dataView, 0x%x)", variableName, field.ByteOffset)
+		return fmt.Sprintf("types.writeDVsToBytes(%s, dataView, 0x%x)", variableName, *field.ByteOffset)
 	case "contestStats":
-		return fmt.Sprintf("types.writeContestStatsToBytes(dataView, 0x%x, %s)", field.ByteOffset, variableName)
+		return fmt.Sprintf("types.writeContestStatsToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
 	case "hyperTrainStats":
-		return fmt.Sprintf("types.writeHyperTrainStatsToBytes(dataView, 0x%x, %s)", field.ByteOffset, variableName)
+		return fmt.Sprintf("types.writeHyperTrainStatsToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
 	case "memory_3ds_trainer":
-		return fmt.Sprintf("types.write3DSTrainerMemoryToBytes(dataView, 0x%x, %s)", field.ByteOffset, variableName)
+		return fmt.Sprintf("types.write3DSTrainerMemoryToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
 	case "memory_3ds_handler":
-		return fmt.Sprintf("types.write3DSHandlerMemoryToBytes(dataView, 0x%x, %s)", field.ByteOffset, variableName)
+		return fmt.Sprintf("types.write3DSHandlerMemoryToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
 	case "memory_switch_trainer":
-		return fmt.Sprintf("types.writeSwitchTrainerMemoryToBytes(dataView, 0x%x, %s)", field.ByteOffset, variableName)
+		return fmt.Sprintf("types.writeSwitchTrainerMemoryToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
 	case "memory_switch_handler":
-		return fmt.Sprintf("types.writeSwitchHandlerMemoryToBytes(dataView, 0x%x, %s)", field.ByteOffset, variableName)
+		return fmt.Sprintf("types.writeSwitchHandlerMemoryToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
 	case "memory":
-		return fmt.Sprintf("types.writeMemoryToBytes(dataView, 0x%x, %s)", field.ByteOffset, variableName)
+		return fmt.Sprintf("types.writeMemoryToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
 	case "MarkingsFourShapes":
-		return fmt.Sprintf("types.markingsFourShapesToBytes(dataView, 0x%x, %s)", field.ByteOffset, variableName)
+		return fmt.Sprintf("types.markingsFourShapesToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
 	case "MarkingsSixShapesNoColor":
-		return fmt.Sprintf("types.markingsSixShapesNoColorToBytes(dataView, 0x%x, %s)", field.ByteOffset, variableName)
+		return fmt.Sprintf("types.markingsSixShapesNoColorToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
 	case "MarkingsSixShapesWithColor":
-		return fmt.Sprintf("types.markingsSixShapesWithColorToBytes(dataView, 0x%x, %s)", field.ByteOffset, variableName)
+		return fmt.Sprintf("types.markingsSixShapesWithColorToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
 	case "ribbons":
 		return ribbonsToBuffer(field)
 	default:
@@ -129,28 +152,34 @@ func fieldFromBufferFunction(field TypeScriptField, endianness string, encoding 
 	isLittleEndian := endianness == "Little"
 	switch field.Type {
 	case "string":
-		return stringFromBufferFunction(field.NumBytes, field.ByteOffset, encoding)
+		panicIfNilNumBytes(field, "fieldFromBufferFunction")
+		return stringFromBufferFunction(*field.NumBytes, *field.ByteOffset, encoding)
 	case "number", "number | undefined":
 		if field.Field.NumBits != nil {
-			return fmt.Sprintf("byteLogic.uIntFromBufferBits(dataView, 0x%x, %d, %d, %t)", field.ByteOffset, *field.Field.BitOffset, *field.Field.NumBits, isLittleEndian)
+			panicIfNilBitOffset(field, "fieldFromBufferFunction")
+			return fmt.Sprintf("byteLogic.uIntFromBufferBits(dataView, 0x%x, %d, %d, %t)", *field.ByteOffset, *field.BitOffset, *field.NumBits, isLittleEndian)
 		}
-		return intFromBufferFunction(field.NumBytes, field.ByteOffset, endianness)
+		panicIfNilNumBytes(field, "fieldFromBufferFunction")
+		return intFromBufferFunction(*field.NumBytes, *field.ByteOffset, endianness)
 	case "boolean":
-		return fmt.Sprintf("byteLogic.getFlag(dataView, 0x%x, %d)", field.ByteOffset, field.BitOffset)
+		panicIfNilBitOffset(field, "fieldFromBufferFunction")
+		return fmt.Sprintf("byteLogic.getFlag(dataView, 0x%x, %d)", *field.ByteOffset, *field.BitOffset)
 	case "Uint8Array":
-		return fmt.Sprintf("new Uint8Array(buffer).slice(0x%x, 0x%x)", field.ByteOffset, field.ByteOffset+field.NumBytes)
+		panicIfNilNumBytes(field, "fieldFromBufferFunction")
+		return fmt.Sprintf("new Uint8Array(buffer).slice(0x%x, 0x%x)", *field.ByteOffset, *field.ByteOffset+*field.NumBytes)
 	case "pokedate", "pokedate | undefined":
-		return fmt.Sprintf("types.pkmDateFromBytes(dataView, 0x%x)", field.ByteOffset)
+		return fmt.Sprintf("types.pkmDateFromBytes(dataView, 0x%x)", *field.ByteOffset)
 	case "ivs30Bits":
-		return fmt.Sprintf("types.read30BitIVsFromBytes(dataView, 0x%x)", field.ByteOffset)
+		return fmt.Sprintf("types.read30BitIVsFromBytes(dataView, 0x%x)", *field.ByteOffset)
 	case "stats":
-		return fmt.Sprintf("types.readStatsFromBytes(dataView, 0x%x)", field.ByteOffset)
+		return fmt.Sprintf("types.readStatsFromBytes(dataView, 0x%x)", *field.ByteOffset)
 	case "statsPreSplit":
-		hpFunc := intFromBufferFunction(field.NumBytes, field.ByteOffset, endianness)
-		atkFunc := intFromBufferFunction(field.NumBytes, field.ByteOffset+field.NumBytes, endianness)
-		defFunc := intFromBufferFunction(field.NumBytes, field.ByteOffset+(field.NumBytes*2), endianness)
-		speOffset := field.ByteOffset + field.NumBytes*3
-		spcOffset := field.ByteOffset + field.NumBytes*4
+		panicIfNilNumBytes(field, "fieldFromBufferFunction")
+		hpFunc := intFromBufferFunction(*field.NumBytes, *field.ByteOffset, endianness)
+		atkFunc := intFromBufferFunction(*field.NumBytes, *field.ByteOffset+*field.NumBytes, endianness)
+		defFunc := intFromBufferFunction(*field.NumBytes, *field.ByteOffset+(*field.NumBytes*2), endianness)
+		speOffset := *field.ByteOffset + *field.NumBytes*3
+		spcOffset := *field.ByteOffset + *field.NumBytes*4
 		return fmt.Sprintf(`{
 			hp: %s,
 			atk: %s,
@@ -159,27 +188,27 @@ func fieldFromBufferFunction(field TypeScriptField, endianness string, encoding 
 			spc: dataView.getUint16(0x%x, %t),
 		}`, hpFunc, atkFunc, defFunc, speOffset, isLittleEndian, spcOffset, isLittleEndian)
 	case "dvs":
-		return fmt.Sprintf("types.readDVsFromBytes(dataView, 0x%x)", field.ByteOffset)
+		return fmt.Sprintf("types.readDVsFromBytes(dataView, 0x%x)", *field.ByteOffset)
 	case "contestStats":
-		return fmt.Sprintf("types.readContestStatsFromBytes(dataView, 0x%x)", field.ByteOffset)
+		return fmt.Sprintf("types.readContestStatsFromBytes(dataView, 0x%x)", *field.ByteOffset)
 	case "memory_3ds_trainer":
-		return fmt.Sprintf("types.read3DSTrainerMemoryFromBytes(dataView, 0x%x)", field.ByteOffset)
+		return fmt.Sprintf("types.read3DSTrainerMemoryFromBytes(dataView, 0x%x)", *field.ByteOffset)
 	case "memory_3ds_handler":
-		return fmt.Sprintf("types.read3DSHandlerMemoryFromBytes(dataView, 0x%x)", field.ByteOffset)
+		return fmt.Sprintf("types.read3DSHandlerMemoryFromBytes(dataView, 0x%x)", *field.ByteOffset)
 	case "memory_switch_trainer":
-		return fmt.Sprintf("types.readSwitchTrainerMemoryFromBytes(dataView, 0x%x)", field.ByteOffset)
+		return fmt.Sprintf("types.readSwitchTrainerMemoryFromBytes(dataView, 0x%x)", *field.ByteOffset)
 	case "memory_switch_handler":
-		return fmt.Sprintf("types.readSwitchHandlerMemoryFromBytes(dataView, 0x%x)", field.ByteOffset)
+		return fmt.Sprintf("types.readSwitchHandlerMemoryFromBytes(dataView, 0x%x)", *field.ByteOffset)
 	case "memory":
-		return fmt.Sprintf("types.readMemoryFromBytes(dataView, 0x%x)", field.ByteOffset)
+		return fmt.Sprintf("types.readMemoryFromBytes(dataView, 0x%x)", *field.ByteOffset)
 	case "hyperTrainStats":
-		return fmt.Sprintf("types.readHyperTrainStatsFromBytes(dataView, 0x%x)", field.ByteOffset)
+		return fmt.Sprintf("types.readHyperTrainStatsFromBytes(dataView, 0x%x)", *field.ByteOffset)
 	case "MarkingsFourShapes":
-		return fmt.Sprintf("types.markingsFourShapesFromBytes(dataView, 0x%x)", field.ByteOffset)
+		return fmt.Sprintf("types.markingsFourShapesFromBytes(dataView, 0x%x)", *field.ByteOffset)
 	case "MarkingsSixShapesNoColor":
-		return fmt.Sprintf("types.markingsSixShapesNoColorFromBytes(dataView, 0x%x)", field.ByteOffset)
+		return fmt.Sprintf("types.markingsSixShapesNoColorFromBytes(dataView, 0x%x)", *field.ByteOffset)
 	case "MarkingsSixShapesWithColor":
-		return fmt.Sprintf("types.markingsSixShapesWithColorFromBytes(dataView, 0x%x)", field.ByteOffset)
+		return fmt.Sprintf("types.markingsSixShapesWithColorFromBytes(dataView, 0x%x)", *field.ByteOffset)
 	case "ribbons":
 		return ribbonsFromBuffer(field)
 	default:
@@ -196,7 +225,8 @@ func defaultValueByField(field TypeScriptField) string {
 	}
 	switch field.Type {
 	case "Uint8Array":
-		return fmt.Sprintf("new Uint8Array(%d)", field.NumBytes)
+		panicIfNilNumBytes(field, "defaultValueByField")
+		return fmt.Sprintf("new Uint8Array(%d)", *field.NumBytes)
 	case "tuple":
 		str := "["
 		for i := 0; i < field.TupleLength; i++ {
@@ -336,26 +366,30 @@ func defaultValueByType(t string) string {
 }
 
 func tupleToBufferFunction(field TypeScriptField, endianness string) string {
-	fmt.Println("TUPLE FUNCTION CALLED FOR", field.Name)
 	funcString := fmt.Sprintf("for (let i = 0; i < %d; i++) {\n", field.TupleLength)
 	isLittleEndian := endianness == "Little"
+	panicIfNilByteOffset(field, "tupleToBufferFunction")
 	switch field.TupleType {
 	case "number":
 		if field.Field.NumBits != nil {
+			panicIfNilBitOffset(field, "tupleToBufferFunction")
 			if field.Field.SeperateBytes {
-				funcString += fmt.Sprintf("byteLogic.uIntToBufferBits(dataView, this.%s[i], 0x%x + i, %d, %d, %t)", field.Name, field.ByteOffset, field.BitOffset, *field.NumBits, endianness == "Little")
+				funcString += fmt.Sprintf("byteLogic.uIntToBufferBits(dataView, this.%s[i], 0x%x + i, %d, %d, %t)", field.Name, *field.ByteOffset, *field.BitOffset, *field.NumBits, endianness == "Little")
 			} else {
-				funcString += fmt.Sprintf("byteLogic.uIntToBufferBits(dataView, this.%s[i], 0x%x, %d + i * %d, %d, %t)", field.Name, field.ByteOffset, field.BitOffset, *field.NumBits, *field.NumBits, endianness == "Little")
+				funcString += fmt.Sprintf("byteLogic.uIntToBufferBits(dataView, this.%s[i], 0x%x, %d + i * %d, %d, %t)", field.Name, *field.ByteOffset, *field.BitOffset, *field.NumBits, *field.NumBits, endianness == "Little")
 			}
-		} else if field.NumBytes == 1 {
-			funcString += fmt.Sprintf("dataView.setUint8(0x%x + i, this.%s[i])\n", field.ByteOffset, field.Name)
 		} else {
-			funcString += fmt.Sprintf("dataView.setUint16(0x%x + i * 2, this.%s[i], %t)\n", field.ByteOffset, field.Name, isLittleEndian)
+			panicIfNilNumBytes(field, "tupleToBufferFunction")
+			if *field.NumBytes == 1 {
+				funcString += fmt.Sprintf("dataView.setUint8(0x%x + i, this.%s[i])\n", *field.ByteOffset, field.Name)
+			} else {
+				funcString += fmt.Sprintf("dataView.setUint16(0x%x + i * 2, this.%s[i], %t)\n", *field.ByteOffset, field.Name, isLittleEndian)
+			}
 		}
 	case "marking":
-		funcString += fmt.Sprintf("dataView.setUint8(0x%x + i, this.%s[i])\n", field.ByteOffset, field.Name)
+		funcString += fmt.Sprintf("dataView.setUint8(0x%x + i, this.%s[i])\n", *field.ByteOffset, field.Name)
 	case "geolocation":
-		funcString += fmt.Sprintf("types.writeGeolocationToBytes(dataView, 0x%x + 2 * i, this.%s[i])\n", field.ByteOffset, field.Name)
+		funcString += fmt.Sprintf("types.writeGeolocationToBytes(dataView, 0x%x + 2 * i, this.%s[i])\n", *field.ByteOffset, field.Name)
 	}
 
 	return funcString + "\n}"
@@ -434,25 +468,28 @@ func intFromBufferFunction(numBytes int, byteOffset int, endianness string) stri
 
 func tupleFromBufferFunction(field TypeScriptField, endianness string) string {
 	funcString := "[\n"
+	panicIfNilByteOffset(field, "tupleToBufferFunction")
 
 	for i := 0; i < field.TupleLength; i++ {
 		switch field.TupleType {
 		case "number":
-			byteOffset := field.ByteOffset + i*field.NumBytes
-			if field.Field.NumBits != nil {
-				if field.Field.SeperateBytes {
-					funcString += fmt.Sprintf("byteLogic.uIntFromBufferBits(dataView, 0x%x, %d, %d, %t),", field.ByteOffset+i, *field.Field.BitOffset, *field.NumBits, endianness == "Little")
+			byteOffset := *field.ByteOffset + i*(*field.NumBytes)
+			if field.NumBits != nil {
+				panicIfNilBitOffset(field, "tupleToBufferFunction")
+				if field.SeperateBytes {
+					funcString += fmt.Sprintf("byteLogic.uIntFromBufferBits(dataView, 0x%x, %d, %d, %t),", *field.ByteOffset+i, *field.BitOffset, *field.NumBits, endianness == "Little")
 				} else {
-					bitOffset := field.BitOffset + i**field.NumBits
-					funcString += fmt.Sprintf("byteLogic.uIntFromBufferBits(dataView, 0x%x, %d, %d, %t),", field.ByteOffset, bitOffset, *field.NumBits, endianness == "Little")
+					bitOffset := *field.BitOffset + i*(*field.NumBits)
+					funcString += fmt.Sprintf("byteLogic.uIntFromBufferBits(dataView, 0x%x, %d, %d, %t),", *field.ByteOffset, bitOffset, *field.NumBits, endianness == "Little")
 				}
 			} else {
-				funcString += intFromBufferFunction(field.NumBytes, byteOffset, endianness) + ",\n"
+				panicIfNilNumBytes(field, "tupleToBufferFunction")
+				funcString += intFromBufferFunction(*field.NumBytes, byteOffset, endianness) + ",\n"
 			}
 		case "marking":
-			funcString += fmt.Sprintf("buffer[0x%x],\n", field.ByteOffset+i)
+			funcString += fmt.Sprintf("buffer[0x%x],\n", *field.ByteOffset+i)
 		case "geolocation":
-			funcString += fmt.Sprintf("types.readGeolocationFromBytes(dataView, 0x%x),\n", field.ByteOffset+2*i)
+			funcString += fmt.Sprintf("types.readGeolocationFromBytes(dataView, 0x%x),\n", *field.ByteOffset+2*i)
 		}
 	}
 
