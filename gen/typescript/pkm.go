@@ -46,7 +46,8 @@ export interface AllPKMFields {
 	getLevel: () => number
 	isShiny: () => boolean
 	isSquareShiny: () => boolean
-  	toBytes: () => ArrayBuffer
+  	
+	toBytes: ((_options?: types.ToBytesOptions) => ArrayBuffer) | (() => ArrayBuffer)
 }`
 
 var fieldOverrideList = []string{"formeNum", "trainerGender", "secretID"}
