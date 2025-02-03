@@ -12,6 +12,11 @@ generate: # Generate PKM code files
 	@npm run format
 	@npm run build
 
+.PHONY: gen-rust
+gen-rust: # Generate Rust PKM code files
+	@go run gen/generate.go
+	@cd rust && cargo fmt --all
+	
 .PHONY: lint
 lint: # Lint typescript files
 	@npm run lint
