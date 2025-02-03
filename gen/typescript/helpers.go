@@ -84,6 +84,10 @@ func panicIfNilBitOffset(field TypeScriptField, caller string) {
 }
 
 func toBufferFunction(field TypeScriptField, endianness string, encoding string, variableName string) string {
+	if field.Type == "ribbons" {
+		return ribbonsToBuffer(field)
+	}
+
 	panicIfNilByteOffset(field, "toBufferFunction")
 	switch field.Type {
 	case "string":
@@ -141,8 +145,6 @@ func toBufferFunction(field TypeScriptField, endianness string, encoding string,
 		return fmt.Sprintf("types.markingsSixShapesNoColorToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
 	case "MarkingsSixShapesWithColor":
 		return fmt.Sprintf("types.markingsSixShapesWithColorToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
-	case "ribbons":
-		return ribbonsToBuffer(field)
 	default:
 		return fmt.Sprintf("(TODO: toBufferFunction: %s)", field.Type)
 	}
@@ -604,7 +606,9 @@ func getDecryptionFunction(fileType string) string {
 	case "PK4", "PK5":
 		return "decryptByteArrayGen45"
 	case "PK6", "PK7":
-		return "decryptByteArrayGen6"
+		return "decryptByteArrayGen67"
+	case "PK8", "PB8", "PA8":
+		return "decryptByteArrayGen8"
 	}
 	return ""
 }
@@ -615,8 +619,8 @@ func getUnshuffleFunction(fileType string) string {
 		return "unshuffleBlocksGen3"
 	case "PK4", "PK5":
 		return "unshuffleBlocksGen45"
-	case "PK6", "PK7":
-		return "unshuffleBlocksGen6"
+	case "PK6", "PK7", "PK8", "PB8", "PA8":
+		return "unshuffleBlocksGen678"
 	}
 	return ""
 }
@@ -627,8 +631,8 @@ func getShuffleFunction(fileType string) string {
 		return "shuffleBlocksGen3"
 	case "PK4", "PK5":
 		return "shuffleBlocksGen45"
-	case "PK6", "PK7":
-		return "shuffleBlocksGen6"
+	case "PK6", "PK7", "PK8", "PB8", "PA8":
+		return "shuffleBlocksGen678"
 	}
 	return ""
 }

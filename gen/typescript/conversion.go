@@ -6,8 +6,9 @@ import (
 	"io/fs"
 	"log"
 	"os"
-	"sort"
+	"slices"
 	"strconv"
+	"strings"
 	"text/template"
 
 	"github.com/andrewbenington/go-pokemon-files/gen/schema"
@@ -25,7 +26,7 @@ func tsBuildConversionMapReversed(source map[string]interface{}, keyType string,
 		keys = append(keys, k)
 	}
 
-	if keyType == "int" {
+	if keyType == "number" {
 		intKeys := lo.Map(keys, func(k string, _ int) int {
 			i, err := strconv.Atoi(k)
 			if err != nil {
@@ -33,10 +34,10 @@ func tsBuildConversionMapReversed(source map[string]interface{}, keyType string,
 			}
 			return i
 		})
-		sort.Ints(intKeys)
+		slices.Sort(intKeys)
 		keys = lo.Map(intKeys, func(k int, _ int) string { return strconv.Itoa(k) })
 	} else {
-		sort.Strings(keys)
+		slices.Sort(keys)
 	}
 
 	var pairs []Pair
@@ -78,7 +79,7 @@ func tsBuildConversionMap(source map[string]interface{}, keyType string, valueTy
 		keys = append(keys, k)
 	}
 
-	if keyType == "int" {
+	if keyType == "number" {
 		intKeys := lo.Map(keys, func(k string, _ int) int {
 			i, err := strconv.Atoi(k)
 			if err != nil {
@@ -86,10 +87,10 @@ func tsBuildConversionMap(source map[string]interface{}, keyType string, valueTy
 			}
 			return i
 		})
-		sort.Ints(intKeys)
+		slices.Sort(intKeys)
 		keys = lo.Map(intKeys, func(k int, _ int) string { return strconv.Itoa(k) })
 	} else {
-		sort.Strings(keys)
+		slices.Sort(keys)
 	}
 
 	var pairs []Pair
@@ -113,18 +114,18 @@ func tsBuildConversionMap(source map[string]interface{}, keyType string, valueTy
 }
 
 func getTSType(t string) string {
-	if t == "string" {
+	if t == "string" || t == "char" {
 		return "string"
 	}
-	if t == "int" {
+	if strings.HasPrefix(t, "uint") {
 		return "number"
 	}
 	return fmt.Sprintf("(TODO: getTSTypes (%s))", t)
 }
 
-const mapTemplate = `export const from{{ .Name }}Map: { [key: {{ getTSType .InputType }}]: {{ getTSType .OutputType }} } = {{ buildFromMap .Map .InputType .OutputType }}
+const mapTemplate = `export const from{{ .Name }}Map: { [key: {{ .InputType }}]: {{ .OutputType }} } = {{ buildFromMap .Map .InputType .OutputType }}
 
-export function from{{ .Name }}(key: {{ getTSType .InputType }}): {{ getTSType .OutputType }} {
+export function from{{ .Name }}(key: {{ .InputType }}): {{ .OutputType }} {
 	if (key in from{{ .Name }}Map) {
 		return from{{ .Name }}Map[key]
 	}
@@ -135,15 +136,15 @@ export function from{{ .Name }}(key: {{ getTSType .InputType }}): {{ getTSType .
 	{{- end }}
 }
 
-export const to{{ .Name }}Map: { [key: {{ getTSType .OutputType }}]: {{ getTSType .InputType }} } = {{ buildToMap .Map .InputType .OutputType }}
+export const to{{ .Name }}Map: { [key: {{ .OutputType }}]: {{ .InputType }} } = {{ buildToMap .Map .InputType .OutputType }}
 
-export function to{{ .Name }}(key: {{ getTSType .OutputType }}): {{ getTSType .InputType }} {
+export function to{{ .Name }}(key: {{ .OutputType }}): {{ .InputType }} {
 	if (key in to{{ .Name }}Map) {
 		return to{{ .Name }}Map[key]
 	}
 	{{- if eq .InputType "string" }}
 	return ` + "`${key}`" + `
-	{{- else if and (eq .OutputType "string") (eq (getTSType .InputType) "number") }}
+	{{- else if and (eq .OutputType "string") (eq (.InputType) "number") }}
 	return parseFloat(key)
 	{{- else }}
 	return key
@@ -199,6 +200,8 @@ func generateConversion(dir string, dirEntry fs.DirEntry) error {
 		if err != nil {
 			return err
 		}
+		mapConversion.InputType = getTSType(mapConversion.InputType)
+		mapConversion.OutputType = getTSType(mapConversion.OutputType)
 
 		tmpl := template.Must(template.New("map").Funcs(template.FuncMap{
 			"buildFromMap": tsBuildConversionMap,
