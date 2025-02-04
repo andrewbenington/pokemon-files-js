@@ -24,6 +24,9 @@ export class PA8 {
     return 'PA8'
   }
   format: 'PA8' = 'PA8'
+  static getBoxSize() {
+    return 360
+  }
   encryptionConstant: number
   sanity: number
   checksum: number
@@ -105,8 +108,8 @@ export class PA8 {
     if (arg instanceof ArrayBuffer) {
       let buffer = arg
       if (encrypted) {
-        const unencryptedBytes = encryption.decryptByteArrayGen8(buffer)
-        const unshuffledBytes = encryption.unshuffleBlocksGen678(unencryptedBytes)
+        const unencryptedBytes = encryption.decryptByteArrayGen8A(buffer)
+        const unshuffledBytes = encryption.unshuffleBlocksGen8A(unencryptedBytes)
         buffer = unshuffledBytes
       }
       const dataView = new DataView(buffer)
@@ -357,7 +360,7 @@ export class PA8 {
   }
 
   toBytes(): ArrayBuffer {
-    const buffer = new ArrayBuffer(376)
+    const buffer = new ArrayBuffer(360)
     const dataView = new DataView(buffer)
 
     dataView.setUint32(0x0, this.encryptionConstant, true)
@@ -486,8 +489,8 @@ export class PA8 {
   }
 
   public toPCBytes() {
-    const shuffledBytes = encryption.shuffleBlocksGen678(this.toBytes())
-    return encryption.decryptByteArrayGen8(shuffledBytes)
+    const shuffledBytes = encryption.shuffleBlocksGen8A(this.toBytes())
+    return encryption.decryptByteArrayGen8A(shuffledBytes)
   }
   public getLevel() {
     return getLevelGen3Onward(this.dexNum, this.exp)

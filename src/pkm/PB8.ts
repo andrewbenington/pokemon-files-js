@@ -24,6 +24,9 @@ export class PB8 {
     return 'PB8'
   }
   format: 'PB8' = 'PB8'
+  static getBoxSize() {
+    return 344
+  }
   encryptionConstant: number
   sanity: number
   checksum: number
@@ -99,7 +102,7 @@ export class PB8 {
       let buffer = arg
       if (encrypted) {
         const unencryptedBytes = encryption.decryptByteArrayGen8(buffer)
-        const unshuffledBytes = encryption.unshuffleBlocksGen678(unencryptedBytes)
+        const unshuffledBytes = encryption.unshuffleBlocksGen8(unencryptedBytes)
         buffer = unshuffledBytes
       }
       const dataView = new DataView(buffer)
@@ -461,7 +464,7 @@ export class PB8 {
   }
 
   public toPCBytes() {
-    const shuffledBytes = encryption.shuffleBlocksGen678(this.toBytes())
+    const shuffledBytes = encryption.shuffleBlocksGen8(this.toBytes())
     return encryption.decryptByteArrayGen8(shuffledBytes)
   }
   public getLevel() {

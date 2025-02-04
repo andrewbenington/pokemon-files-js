@@ -52,6 +52,7 @@ import { getGen3MiscFlags } from '../util/util'
 export class {{ $className }} {
   static getName() {return '{{ $className }}'}
   format: '{{ $className }}' = '{{ $className }}'
+  static getBoxSize() {return {{ .TotalBytes }} }
 {{- range .Fields }}
   {{ .Name }}: {{ .TypescriptType }}
 {{- end }}

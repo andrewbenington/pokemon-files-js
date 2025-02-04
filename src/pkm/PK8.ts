@@ -24,6 +24,9 @@ export class PK8 {
     return 'PK8'
   }
   format: 'PK8' = 'PK8'
+  static getBoxSize() {
+    return 344
+  }
   encryptionConstant: number
   sanity: number
   checksum: number
@@ -99,7 +102,7 @@ export class PK8 {
       let buffer = arg
       if (encrypted) {
         const unencryptedBytes = encryption.decryptByteArrayGen8(buffer)
-        const unshuffledBytes = encryption.unshuffleBlocksGen678(unencryptedBytes)
+        const unshuffledBytes = encryption.unshuffleBlocksGen8(unencryptedBytes)
         buffer = unshuffledBytes
       }
       const dataView = new DataView(buffer)
@@ -461,7 +464,7 @@ export class PK8 {
   }
 
   public toPCBytes() {
-    const shuffledBytes = encryption.shuffleBlocksGen678(this.toBytes())
+    const shuffledBytes = encryption.shuffleBlocksGen8(this.toBytes())
     return encryption.decryptByteArrayGen8(shuffledBytes)
   }
   public getLevel() {

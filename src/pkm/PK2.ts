@@ -16,6 +16,9 @@ export class PK2 {
     return 'PK2'
   }
   format: 'PK2' = 'PK2'
+  static getBoxSize() {
+    return 32
+  }
   gameOfOrigin: number
   languageIndex: number
   dexNum: number
