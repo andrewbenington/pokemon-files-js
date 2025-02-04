@@ -30,6 +30,9 @@ export class COLOPKM {
     return 'COLOPKM'
   }
   format: 'COLOPKM' = 'COLOPKM'
+  static getBoxSize() {
+    return 312
+  }
   dexNum: number
   personalityValue: number
   gameOfOrigin: number

@@ -233,7 +233,11 @@ func getDecryptionFunction(fileType string) string {
 	case "PK4", "PK5":
 		return "decryptByteArrayGen45"
 	case "PK6", "PK7":
-		return "decryptByteArrayGen6"
+		return "decryptByteArrayGen67"
+	case "PK8", "PB8":
+		return "decryptByteArrayGen8"
+	case "PA8":
+		return "decryptByteArrayGen8A"
 	}
 	return ""
 }
@@ -244,8 +248,12 @@ func getUnshuffleFunction(fileType string) string {
 		return "unshuffleBlocksGen3"
 	case "PK4", "PK5":
 		return "unshuffleBlocksGen45"
-	case "PK6", "PK7", "PK8":
-		return "unshuffleBlocksGen678"
+	case "PK6", "PK7":
+		return "unshuffleBlocksGen67"
+	case "PK8", "PB8":
+		return "unshuffleBlocksGen8"
+	case "PA8":
+		return "unshuffleBlocksGen8A"
 	}
 	return ""
 }
@@ -256,8 +264,12 @@ func getShuffleFunction(fileType string) string {
 		return "shuffleBlocksGen3"
 	case "PK4", "PK5":
 		return "shuffleBlocksGen45"
-	case "PK6", "PK7", "PK8":
-		return "shuffleBlocksGen678"
+	case "PK6", "PK7":
+		return "shuffleBlocksGen67"
+	case "PK8", "PB8":
+		return "shuffleBlocksGen8"
+	case "PA8":
+		return "shuffleBlocksGen8A"
 	}
 	return ""
 }
