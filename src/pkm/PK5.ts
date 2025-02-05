@@ -24,6 +24,9 @@ export class PK5 {
     return 'PK5'
   }
   format: 'PK5' = 'PK5'
+  static getBoxSize() {
+    return 136
+  }
   personalityValue: number
   dexNum: number
   heldItemIndex: number

@@ -20,13 +20,7 @@ type TypeScriptField struct {
 // TypeScriptSchemaData represents the template data for PKM code generation
 type TypeScriptSchemaData struct {
 	schema.SchemaData
-	FileName       string            `json:"fileName"`
 	Fields         []TypeScriptField `json:"fields"`
-	StringEncoding string            `json:"stringEncoding"`
-	Endian         string            `json:"endian"`
-	TotalBytes     int               `json:"totalBytes"`
-	BoxFileSize    int               `json:"boxFileSize"`
-	NatureFromPV   bool              `json:"natureFromPV"`
 	Imports        map[string]*[]string
 	DefaultImports map[string]*[]string
 }
@@ -101,13 +95,6 @@ func TypeScriptFieldFromSchemaField(sf schema.Field) (*TypeScriptField, error) {
 		tf.TypescriptType = getTypescriptType(sf.Type)
 	}
 	return &tf, nil
-}
-
-func (f *TypeScriptField) TypescriptTypeString() string {
-	if f.Type == "tuple" {
-		return fmt.Sprintf("%s[]", getTypescriptType(f.TupleType))
-	}
-	return getTypescriptType(f.Type)
 }
 
 func getTypescriptType(t string) string {

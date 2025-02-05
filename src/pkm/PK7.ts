@@ -24,6 +24,9 @@ export class PK7 {
     return 'PK7'
   }
   format: 'PK7' = 'PK7'
+  static getBoxSize() {
+    return 232
+  }
   encryptionConstant: number
   sanity: number
   checksum: number
@@ -93,8 +96,8 @@ export class PK7 {
     if (arg instanceof ArrayBuffer) {
       let buffer = arg
       if (encrypted) {
-        const unencryptedBytes = encryption.decryptByteArrayGen6(buffer)
-        const unshuffledBytes = encryption.unshuffleBlocksGen6(unencryptedBytes)
+        const unencryptedBytes = encryption.decryptByteArrayGen67(buffer)
+        const unshuffledBytes = encryption.unshuffleBlocksGen67(unencryptedBytes)
         buffer = unshuffledBytes
       }
       const dataView = new DataView(buffer)
@@ -471,8 +474,8 @@ export class PK7 {
   }
 
   public toPCBytes() {
-    const shuffledBytes = encryption.shuffleBlocksGen6(this.toBytes())
-    return encryption.decryptByteArrayGen6(shuffledBytes)
+    const shuffledBytes = encryption.shuffleBlocksGen67(this.toBytes())
+    return encryption.decryptByteArrayGen67(shuffledBytes)
   }
   public getLevel() {
     return getLevelGen3Onward(this.dexNum, this.exp)

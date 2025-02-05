@@ -24,6 +24,9 @@ export class PK9 {
     return 'PK9'
   }
   format: 'PK9' = 'PK9'
+  static getBoxSize() {
+    return 344
+  }
   encryptionConstant: number
   checksum: number
   dexNum: number

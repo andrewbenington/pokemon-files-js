@@ -2,7 +2,9 @@ const GEN3_BLOCKS_OFFSET = 0x20
 const GEN3_BLOCK_SIZE = 12
 const GEN456_BLOCKS_OFFSET = 0x08
 const GEN45_BLOCK_SIZE = 0x20
-const GEN6_BLOCK_SIZE = 0x38
+const GEN67_BLOCK_SIZE = 0x38
+const GEN8_BLOCK_SIZE = 0x50
+const GEN8A_BLOCK_SIZE = 0x58
 
 const shuffleBlockOrders = [
   [0, 1, 2, 3],
@@ -161,16 +163,12 @@ export const unshuffleBlocksGen45 = (bytes: ArrayBuffer) => {
   return unshuffleBlocks(bytes, shiftValue, GEN45_BLOCK_SIZE, GEN456_BLOCKS_OFFSET)
 }
 
-const decryptByteArray = (
-  bytes: ArrayBuffer,
-  seed: number,
-  blockSize: number,
-  blockOffset: number
-) => {
+const ENCRYPTION_OFFSET = 8
+const decryptByteArray = (bytes: ArrayBuffer, seed: number, blockSize: number) => {
   const unencryptedBytes = new Uint8Array(bytes)
   const dataView = new DataView(bytes)
   const newDataView = new DataView(bytes)
-  for (let i = blockOffset; i < blockOffset + 4 * blockSize; i += 2) {
+  for (let i = ENCRYPTION_OFFSET; i < ENCRYPTION_OFFSET + 4 * blockSize; i += 2) {
     const bigIntSeed = BigInt(0x41c64e6d) * BigInt(seed) + BigInt(0x6073)
     seed = Number(bigIntSeed & BigInt(0xffffffff))
     const xorValue = (seed >> 16) & 0xffff
@@ -182,24 +180,57 @@ const decryptByteArray = (
 
 export const decryptByteArrayGen45 = (bytes: ArrayBuffer) => {
   const checksum = new DataView(bytes).getUint16(0x06, true)
-  return decryptByteArray(bytes, checksum, GEN45_BLOCK_SIZE, GEN456_BLOCKS_OFFSET)
+  return decryptByteArray(bytes, checksum, GEN45_BLOCK_SIZE)
 }
 
-export const shuffleBlocksGen6 = (bytes: ArrayBuffer) => {
+export const shuffleBlocksGen67 = (bytes: ArrayBuffer) => {
   const encryptionConstant = new DataView(bytes).getUint32(0x00, true)
   const shiftValue = ((encryptionConstant & 0x3e000) >> 0xd) % 24
-  return shuffleBlocks(bytes, shiftValue, GEN6_BLOCK_SIZE, GEN456_BLOCKS_OFFSET)
+  return shuffleBlocks(bytes, shiftValue, GEN67_BLOCK_SIZE, GEN456_BLOCKS_OFFSET)
 }
 
-export const unshuffleBlocksGen6 = (bytes: ArrayBuffer) => {
+export const unshuffleBlocksGen67 = (bytes: ArrayBuffer) => {
   const encryptionConstant = new DataView(bytes).getUint32(0x00, true)
   const shiftValue = ((encryptionConstant & 0x3e000) >> 0xd) % 24
-  return unshuffleBlocks(bytes, shiftValue, GEN6_BLOCK_SIZE, GEN456_BLOCKS_OFFSET)
+  return unshuffleBlocks(bytes, shiftValue, GEN67_BLOCK_SIZE, GEN456_BLOCKS_OFFSET)
 }
 
-export const decryptByteArrayGen6 = (bytes: ArrayBuffer) => {
+export const shuffleBlocksGen8 = (bytes: ArrayBuffer) => {
   const encryptionConstant = new DataView(bytes).getUint32(0x00, true)
-  return decryptByteArray(bytes, encryptionConstant, GEN6_BLOCK_SIZE, GEN456_BLOCKS_OFFSET)
+  const shiftValue = ((encryptionConstant & 0x3e000) >> 0xd) % 24
+  return shuffleBlocks(bytes, shiftValue, GEN8_BLOCK_SIZE, GEN456_BLOCKS_OFFSET)
+}
+
+export const unshuffleBlocksGen8 = (bytes: ArrayBuffer) => {
+  const encryptionConstant = new DataView(bytes).getUint32(0x00, true)
+  const shiftValue = ((encryptionConstant & 0x3e000) >> 0xd) % 24
+  return unshuffleBlocks(bytes, shiftValue, GEN8_BLOCK_SIZE, GEN456_BLOCKS_OFFSET)
+}
+export const shuffleBlocksGen8A = (bytes: ArrayBuffer) => {
+  const encryptionConstant = new DataView(bytes).getUint32(0x00, true)
+  const shiftValue = ((encryptionConstant & 0x3e000) >> 0xd) % 24
+  return shuffleBlocks(bytes, shiftValue, GEN8A_BLOCK_SIZE, GEN456_BLOCKS_OFFSET)
+}
+
+export const unshuffleBlocksGen8A = (bytes: ArrayBuffer) => {
+  const encryptionConstant = new DataView(bytes).getUint32(0x00, true)
+  const shiftValue = ((encryptionConstant & 0x3e000) >> 0xd) % 24
+  return unshuffleBlocks(bytes, shiftValue, GEN8A_BLOCK_SIZE, GEN456_BLOCKS_OFFSET)
+}
+
+export const decryptByteArrayGen67 = (bytes: ArrayBuffer) => {
+  const encryptionConstant = new DataView(bytes).getUint32(0x00, true)
+  return decryptByteArray(bytes, encryptionConstant, GEN67_BLOCK_SIZE)
+}
+
+export const decryptByteArrayGen8 = (bytes: ArrayBuffer) => {
+  const encryptionConstant = new DataView(bytes).getUint32(0x00, true)
+  return decryptByteArray(bytes, encryptionConstant, GEN8_BLOCK_SIZE)
+}
+
+export const decryptByteArrayGen8A = (bytes: ArrayBuffer) => {
+  const encryptionConstant = new DataView(bytes).getUint32(0x00, true)
+  return decryptByteArray(bytes, encryptionConstant, GEN8A_BLOCK_SIZE)
 }
 
 export const get16BitChecksumLittleEndian = (bytes: ArrayBuffer, start: number, end: number) => {

@@ -30,6 +30,9 @@ export class XDPKM {
     return 'XDPKM'
   }
   format: 'XDPKM' = 'XDPKM'
+  static getBoxSize() {
+    return 196
+  }
   dexNum: number
   heldItemIndex: number
   currentHP: number

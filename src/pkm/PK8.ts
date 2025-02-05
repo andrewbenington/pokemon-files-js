@@ -11,6 +11,7 @@ import {
 } from 'pokemon-resources'
 
 import * as byteLogic from '../util/byteLogic'
+import * as encryption from '../util/encryption'
 import { AllPKMFields } from '../util/pkmInterface'
 import { filterRibbons } from '../util/ribbonLogic'
 import { getLevelGen3Onward, getStats } from '../util/statCalc'
@@ -23,6 +24,9 @@ export class PK8 {
     return 'PK8'
   }
   format: 'PK8' = 'PK8'
+  static getBoxSize() {
+    return 344
+  }
   encryptionConstant: number
   sanity: number
   checksum: number
@@ -93,9 +97,14 @@ export class PK8 {
   trainerMemory: types.Memory
   hyperTraining: types.HyperTrainStats
   trainerGender: boolean
-  constructor(arg: ArrayBuffer | AllPKMFields) {
+  constructor(arg: ArrayBuffer | AllPKMFields, encrypted?: boolean) {
     if (arg instanceof ArrayBuffer) {
-      const buffer = arg
+      let buffer = arg
+      if (encrypted) {
+        const unencryptedBytes = encryption.decryptByteArrayGen8(buffer)
+        const unshuffledBytes = encryption.unshuffleBlocksGen8(unencryptedBytes)
+        buffer = unshuffledBytes
+      }
       const dataView = new DataView(buffer)
       this.encryptionConstant = dataView.getUint32(0x0, true)
       this.sanity = dataView.getUint16(0x4, true)
@@ -449,6 +458,14 @@ export class PK8 {
 
   public get natureName() {
     return NatureToString(this.nature)
+  }
+  public refreshChecksum() {
+    this.checksum = encryption.get16BitChecksumLittleEndian(this.toBytes(), 0x00, 0x00)
+  }
+
+  public toPCBytes() {
+    const shuffledBytes = encryption.shuffleBlocksGen8(this.toBytes())
+    return encryption.decryptByteArrayGen8(shuffledBytes)
   }
   public getLevel() {
     return getLevelGen3Onward(this.dexNum, this.exp)

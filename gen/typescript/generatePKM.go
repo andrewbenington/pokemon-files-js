@@ -52,6 +52,7 @@ import { getGen3MiscFlags } from '../util/util'
 export class {{ $className }} {
   static getName() {return '{{ $className }}'}
   format: '{{ $className }}' = '{{ $className }}'
+  static getBoxSize() {return {{ .TotalBytes }} }
 {{- range .Fields }}
   {{ .Name }}: {{ .TypescriptType }}
 {{- end }}
@@ -102,7 +103,9 @@ export class {{ $className }} {
     {{- end}}
     const dataView = new DataView(buffer)
     {{ range $field := .Fields }}
-      {{ writeFieldToBytes $field $schema }}
+      {{- if not $field.NoWrite }}
+        {{ writeFieldToBytes $field $schema }}
+      {{- end }}
     {{- end }}
     {{- if eq .SchemaData.FileName "PK3" }}
     dataView.setUint8(0x13, getGen3MiscFlags(this))

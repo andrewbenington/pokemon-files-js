@@ -21,6 +21,9 @@ export class PB7 {
     return 'PB7'
   }
   format: 'PB7' = 'PB7'
+  static getBoxSize() {
+    return 232
+  }
   encryptionConstant: number
   dexNum: number
   heldItemIndex: number
