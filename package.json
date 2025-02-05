@@ -1,6 +1,6 @@
 {
   "name": "pokemon-files",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "description": "",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
