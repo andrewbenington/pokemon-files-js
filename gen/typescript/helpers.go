@@ -73,11 +73,22 @@ func toBufferFunction(field TypeScriptField, endianness string, encoding string,
 	switch field.Type {
 	case "string":
 		return stringToBufferFunction(field.Name, field.ByteOffset, field.NumBytes, encoding, field.TerminateString)
-	case "number", "number | undefined":
+	case "number":
 		if field.Field.NumBits != nil {
 			return fmt.Sprintf("byteLogic.uIntToBufferBits(dataView, %s, %d, %d, %d, %t)", variableName, field.ByteOffset, field.BitOffset, *field.Field.NumBits, endianness == "Little")
 		}
 		return intToBufferFunction(field.NumBytes, field.ByteOffset, endianness, variableName)
+	case "number | undefined":
+		if field.Field.NumBits != nil {
+			return fmt.Sprintf("byteLogic.uIntToBufferBits(dataView, %s ?? 0, %d, %d, %d, %t)", variableName, field.ByteOffset, field.BitOffset, *field.Field.NumBits, endianness == "Little")
+		}
+		defaultVal := "0"
+		if field.Name == "affixedRibbon" {
+			defaultVal = "0xff"
+		}
+		return intToBufferFunction(field.NumBytes, field.ByteOffset, endianness, fmt.Sprintf("%s === undefined ? %s : %s", variableName, defaultVal, variableName))
+	case "float":
+		return fmt.Sprintf("dataView.setFloat32(0x%x, %s, true)", field.ByteOffset, variableName)
 	case "boolean":
 		return fmt.Sprintf("byteLogic.setFlag(dataView, 0x%x, %d, %s)", field.ByteOffset, field.BitOffset, variableName)
 	case "Uint8Array":
@@ -88,7 +99,12 @@ func toBufferFunction(field TypeScriptField, endianness string, encoding string,
 	case "ivs30Bits":
 		return fmt.Sprintf("types.write30BitIVsToBytes(dataView, 0x%x, %s)", field.ByteOffset, variableName)
 	case "stats":
-		return fmt.Sprintf("types.writeStatsToBytes(dataView, 0x%x, %s)", field.ByteOffset, variableName)
+		if field.NumBytes == 6 {
+			return fmt.Sprintf("types.writeStatsToBytesU8(dataView, 0x%x, %s)", field.ByteOffset, variableName)
+		} else if field.NumBytes == 12 {
+			return fmt.Sprintf("types.writeStatsToBytesU16(dataView, 0x%x, %s)", field.ByteOffset, variableName)
+		}
+		panic(fmt.Sprintf("stats field has invalid size: %d", field.NumBytes))
 	case "statsPreSplit":
 		atkOffset := field.ByteOffset + field.NumBytes
 		defOffset := field.ByteOffset + field.NumBytes*2
@@ -132,11 +148,23 @@ func fieldFromBufferFunction(field TypeScriptField, endianness string, encoding 
 	switch field.Type {
 	case "string":
 		return stringFromBufferFunction(field.NumBytes, field.ByteOffset, encoding)
-	case "number", "number | undefined":
+	case "float":
+		return fmt.Sprintf("dataView.getFloat32(0x%x, true)", field.ByteOffset)
+	case "number":
 		if field.Field.NumBits != nil {
 			return fmt.Sprintf("byteLogic.uIntFromBufferBits(dataView, 0x%x, %d, %d, %t)", field.ByteOffset, *field.Field.BitOffset, *field.Field.NumBits, isLittleEndian)
 		}
 		return intFromBufferFunction(field.NumBytes, field.ByteOffset, endianness)
+	case "number | undefined":
+		if field.Field.NumBits != nil {
+			return fmt.Sprintf("byteLogic.uIntFromBufferBits(dataView, 0x%x, %d, %d, %t) ?? 0", field.ByteOffset, *field.Field.BitOffset, *field.Field.NumBits, isLittleEndian)
+		}
+		undefinedVal := "0"
+		if field.Name == "affixedRibbon" {
+			undefinedVal = "0xff"
+		}
+		fromBuf := intFromBufferFunction(field.NumBytes, field.ByteOffset, endianness)
+		return fmt.Sprintf("%s === %s ? undefined : %s", fromBuf, undefinedVal, fromBuf)
 	case "boolean":
 		return fmt.Sprintf("byteLogic.getFlag(dataView, 0x%x, %d)", field.ByteOffset, field.BitOffset)
 	case "Uint8Array":
@@ -146,7 +174,12 @@ func fieldFromBufferFunction(field TypeScriptField, endianness string, encoding 
 	case "ivs30Bits":
 		return fmt.Sprintf("types.read30BitIVsFromBytes(dataView, 0x%x)", field.ByteOffset)
 	case "stats":
-		return fmt.Sprintf("types.readStatsFromBytes(dataView, 0x%x)", field.ByteOffset)
+		if field.NumBytes == 6 {
+			return fmt.Sprintf("types.readStatsFromBytesU8(dataView, 0x%x)", field.ByteOffset)
+		} else if field.NumBytes == 12 {
+			return fmt.Sprintf("types.readStatsFromBytesU16(dataView, 0x%x)", field.ByteOffset)
+		}
+		panic(fmt.Sprintf("stats field has invalid size: %d", field.NumBytes))
 	case "statsPreSplit":
 		hpFunc := intFromBufferFunction(field.NumBytes, field.ByteOffset, endianness)
 		atkFunc := intFromBufferFunction(field.NumBytes, field.ByteOffset+field.NumBytes, endianness)
@@ -308,8 +341,10 @@ func defaultValueByType(t string) string {
 	switch t {
 	case "string":
 		return `''`
-	case "number", "number | undefined", "marking":
+	case "number", "marking", "float":
 		return "0"
+	case "number | undefined":
+		return "undefined"
 	case "boolean":
 		return "false"
 	case "pokedate", "pokedate | undefined":
@@ -570,8 +605,10 @@ func getDecryptionFunction(fileType string) string {
 		return "decryptByteArrayGen45"
 	case "PK6", "PK7":
 		return "decryptByteArrayGen67"
-	case "PK8", "PB8", "PA8":
+	case "PK8", "PB8":
 		return "decryptByteArrayGen8"
+	case "PA8":
+		return "decryptByteArrayGen8A"
 	}
 	return ""
 }
@@ -582,8 +619,12 @@ func getUnshuffleFunction(fileType string) string {
 		return "unshuffleBlocksGen3"
 	case "PK4", "PK5":
 		return "unshuffleBlocksGen45"
-	case "PK6", "PK7", "PK8", "PB8", "PA8":
-		return "unshuffleBlocksGen678"
+	case "PK6", "PK7":
+		return "unshuffleBlocksGen67"
+	case "PK8", "PB8":
+		return "unshuffleBlocksGen8"
+	case "PA8":
+		return "unshuffleBlocksGen8A"
 	}
 	return ""
 }
@@ -594,8 +635,12 @@ func getShuffleFunction(fileType string) string {
 		return "shuffleBlocksGen3"
 	case "PK4", "PK5":
 		return "shuffleBlocksGen45"
-	case "PK6", "PK7", "PK8", "PB8", "PA8":
-		return "shuffleBlocksGen678"
+	case "PK6", "PK7":
+		return "shuffleBlocksGen67"
+	case "PK8", "PB8":
+		return "shuffleBlocksGen8"
+	case "PA8":
+		return "shuffleBlocksGen8A"
 	}
 	return ""
 }

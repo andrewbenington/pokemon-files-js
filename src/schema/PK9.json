@@ -236,7 +236,7 @@
     },
     {
       "name": "ivs",
-      "type": "stats",
+      "type": "ivs30Bits",
       "numBytes": 2,
       "byteOffset": 140
     },

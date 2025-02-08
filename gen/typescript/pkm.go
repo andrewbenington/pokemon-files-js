@@ -40,10 +40,15 @@ export interface AllPKMFields {
   {{ .Name }}?: {{ .TypesJoined }}
 	{{- end }}
 {{- end }}
+	heightAbsolute?: number
+	heightDeviation?: number
+	weightAbsolute?: number
+	weightDeviation?: number
 	heldItemName: string
 	language: string
   	isShadow?: boolean
 	getLevel: () => number
+	calcChecksum?: () => number
 	isShiny: () => boolean
 	isSquareShiny: () => boolean
   	// eslint-disable-next-line no-unused-vars

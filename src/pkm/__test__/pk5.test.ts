@@ -87,14 +87,14 @@ const files = fs.readdirSync('./Gen5')
 //   expect(blazikenGen3.bytes).toEqual(gen3PKM.bytes)
 // });
 
-test('pk5 to and from bytes', () => {
-  for (const filename of files) {
-    console.log(filename)
-    // const bytes = fs.readSync(filename)
-    // const pk5 = new PK5()
-  }
-  // expect(getMonGen12Identifier(ohPKM)).toEqual(getMonGen12Identifier(hoohGen2))
-})
+// test('pk5 to and from bytes', () => {
+//   for (const filename of files) {
+//     console.log(filename)
+//     const bytes = fs.readSync(filename)
+//     const pk5 = new PK5()
+//   }
+//   expect(getMonGen12Identifier(ohPKM)).toEqual(getMonGen12Identifier(hoohGen2))
+// })
 
 // test('gen 6+ nickname accuracy', () => {
 //   const converted = new PK3(slowpokeGen7);

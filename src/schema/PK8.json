@@ -466,12 +466,26 @@
       "type": "boolean",
       "byteOffset": 293,
       "bitOffset": 7
+    },
+    {
+      "name": "level",
+      "type": "number",
+      "byteOffset": 328,
+      "numBytes": 1
+    },
+    {
+      "name": "stats",
+      "type": "stats",
+      "byteOffset": 330,
+      "numBytes": 12
     }
   ],
   "stringEncoding": "UTF-16",
   "endian": "Little",
   "shinyThreshold": 16,
   "maxValidMove": 826,
+  "checksumStart": 8,
+  "checksumEnd": 328,
   "maxRibbon": "Slump Mark",
   "maxBall": 26
 }

@@ -102,8 +102,8 @@ export class COLOPKM {
       ]
       this.heldItemIndex = dataView.getUint16(0x88, false)
       this.currentHP = dataView.getUint16(0x8a, false)
-      this.evs = types.readStatsFromBytes(dataView, 0x99)
-      this.ivs = types.readStatsFromBytes(dataView, 0xa5)
+      this.evs = types.readStatsFromBytesU8(dataView, 0x99)
+      this.ivs = types.readStatsFromBytesU8(dataView, 0xa5)
       this.contest = types.readContestStatsFromBytes(dataView, 0xb2)
       this.isFatefulEncounter = byteLogic.getFlag(dataView, 0xc9, 4)
       this.pokerusByte = dataView.getUint8(0xca)
@@ -216,8 +216,8 @@ export class COLOPKM {
     }
     dataView.setUint16(0x88, this.heldItemIndex, false)
     dataView.setUint16(0x8a, this.currentHP, false)
-    types.writeStatsToBytes(dataView, 0x99, this.evs)
-    types.writeStatsToBytes(dataView, 0xa5, this.ivs)
+    types.writeStatsToBytesU8(dataView, 0x99, this.evs)
+    types.writeStatsToBytesU8(dataView, 0xa5, this.ivs)
     types.writeContestStatsToBytes(dataView, 0xb2, this.contest)
     byteLogic.setFlag(dataView, 0xc9, 4, this.isFatefulEncounter)
     dataView.setUint8(0xca, this.pokerusByte)
@@ -286,6 +286,7 @@ export class COLOPKM {
     }
     return 0
   }
+
   public getLevel() {
     return getLevelGen3Onward(this.dexNum, this.exp)
   }

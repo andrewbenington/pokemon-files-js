@@ -11,8 +11,9 @@ func Generate(formats []string) {
 	os.MkdirAll(path.Join("src", "pkm"), 0755)
 	universalFields := generateInterface(formats)
 	for _, format := range formats {
-		// generateFormat(format)
-		if format == "PK4" || format == "PK3" {
+		// TODO: make sure these use generatePersonalityValue... and
+		// make them generated again
+		if format == "PK5" || format == "PK4" || format == "PK3" {
 			continue
 		}
 		generateFormatClass(format, universalFields)

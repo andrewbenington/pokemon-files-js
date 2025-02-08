@@ -80,7 +80,7 @@ export class PB8 {
   consoleRegion: number
   languageIndex: number
   formArgument: number
-  affixedRibbon: number
+  affixedRibbon: number | undefined
   trainerName: string
   trainerFriendship: number
   eggDate: types.PKMDate | undefined
@@ -125,7 +125,7 @@ export class PB8 {
       this.isFatefulEncounter = byteLogic.getFlag(dataView, 0x22, 0)
       this.gender = dataView.getUint8(0x22)
       this.formeNum = dataView.getUint16(0x24, true)
-      this.evs = types.readStatsFromBytes(dataView, 0x26)
+      this.evs = types.readStatsFromBytesU8(dataView, 0x26)
       this.contest = types.readContestStatsFromBytes(dataView, 0x2c)
       this.pokerusByte = dataView.getUint8(0x32)
       this.ribbonBytes = new Uint8Array(buffer).slice(0x34, 0x3c)
@@ -179,7 +179,7 @@ export class PB8 {
       this.consoleRegion = dataView.getUint8(0xe0)
       this.languageIndex = dataView.getUint8(0xe2)
       this.formArgument = dataView.getUint32(0xe4, true)
-      this.affixedRibbon = dataView.getUint8(0xe8)
+      this.affixedRibbon = dataView.getUint8(0xe8) === 0xff ? undefined : dataView.getUint8(0xe8)
       this.trainerName = stringLogic.utf16BytesToString(buffer, 0xf8, 12)
       this.trainerFriendship = dataView.getUint8(0x112)
       this.eggDate = types.pkmDateFromBytes(dataView, 0x119)
@@ -288,7 +288,7 @@ export class PB8 {
       this.consoleRegion = other.consoleRegion ?? 0
       this.languageIndex = other.languageIndex
       this.formArgument = other.formArgument ?? 0
-      this.affixedRibbon = other.affixedRibbon ?? 0
+      this.affixedRibbon = other.affixedRibbon ?? undefined
       this.trainerName = other.trainerName
       this.trainerFriendship = other.trainerFriendship ?? 0
       this.eggDate = other.eggDate ?? {
@@ -364,7 +364,7 @@ export class PB8 {
     byteLogic.setFlag(dataView, 0x22, 0, this.isFatefulEncounter)
     dataView.setUint8(0x22, this.gender)
     dataView.setUint16(0x24, this.formeNum, true)
-    types.writeStatsToBytes(dataView, 0x26, this.evs)
+    types.writeStatsToBytesU8(dataView, 0x26, this.evs)
     types.writeContestStatsToBytes(dataView, 0x2c, this.contest)
     dataView.setUint8(0x32, this.pokerusByte)
     new Uint8Array(buffer).set(new Uint8Array(this.ribbonBytes.slice(0, 8)), 0x34)
@@ -406,7 +406,7 @@ export class PB8 {
     dataView.setUint8(0xe0, this.consoleRegion)
     dataView.setUint8(0xe2, this.languageIndex)
     dataView.setUint32(0xe4, this.formArgument, true)
-    dataView.setUint8(0xe8, this.affixedRibbon)
+    dataView.setUint8(0xe8, this.affixedRibbon === undefined ? 0xff : this.affixedRibbon)
     stringLogic.writeUTF16StringToBytes(dataView, this.trainerName, 0xf8, 12)
     dataView.setUint8(0x112, this.trainerFriendship)
     types.writePKMDateToBytes(dataView, 0x119, this.eggDate)
@@ -459,6 +459,11 @@ export class PB8 {
   public get natureName() {
     return NatureToString(this.nature)
   }
+
+  public calcChecksum() {
+    return encryption.get16BitChecksumLittleEndian(this.toBytes(), 0x00, 0x00)
+  }
+
   public refreshChecksum() {
     this.checksum = encryption.get16BitChecksumLittleEndian(this.toBytes(), 0x00, 0x00)
   }
@@ -467,6 +472,7 @@ export class PB8 {
     const shuffledBytes = encryption.shuffleBlocksGen8(this.toBytes())
     return encryption.decryptByteArrayGen8(shuffledBytes)
   }
+
   public getLevel() {
     return getLevelGen3Onward(this.dexNum, this.exp)
   }

@@ -229,6 +229,7 @@ export class PK2 {
     }
     return 0
   }
+
   public getLevel() {
     return getLevelGen12(this.dexNum, this.exp)
   }

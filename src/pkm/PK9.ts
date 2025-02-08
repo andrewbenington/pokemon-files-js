@@ -77,7 +77,7 @@ export class PK9 {
   gameOfOrigin: number
   gameOfOriginBattle: number
   formArgument: number
-  affixedRibbon: number
+  affixedRibbon: number | undefined
   languageIndex: number
   trainerName: string
   trainerFriendship: number
@@ -116,7 +116,7 @@ export class PK9 {
       this.isFatefulEncounter = byteLogic.getFlag(dataView, 0x22, 0)
       this.gender = dataView.getUint8(0x22)
       this.formeNum = dataView.getUint16(0x24, true)
-      this.evs = types.readStatsFromBytes(dataView, 0x26)
+      this.evs = types.readStatsFromBytesU8(dataView, 0x26)
       this.contest = types.readContestStatsFromBytes(dataView, 0x2c)
       this.pokerusByte = dataView.getUint8(0x32)
       this.ribbonBytes = new Uint8Array(buffer).slice(0x34, 0x3c)
@@ -152,7 +152,7 @@ export class PK9 {
         dataView.getUint16(0x88, true),
       ]
       this.currentHP = dataView.getUint16(0x8a, true)
-      this.ivs = types.readStatsFromBytes(dataView, 0x8c)
+      this.ivs = types.read30BitIVsFromBytes(dataView, 0x8c)
       this.isEgg = byteLogic.getFlag(dataView, 0x8c, 30)
       this.isNicknamed = byteLogic.getFlag(dataView, 0x8c, 31)
       this.statusCondition = dataView.getUint32(0x90, true)
@@ -168,7 +168,7 @@ export class PK9 {
       this.gameOfOrigin = dataView.getUint8(0xce)
       this.gameOfOriginBattle = dataView.getUint8(0xcf)
       this.formArgument = dataView.getUint32(0xd0, true)
-      this.affixedRibbon = dataView.getUint8(0xd4)
+      this.affixedRibbon = dataView.getUint8(0xd4) === 0xff ? undefined : dataView.getUint8(0xd4)
       this.languageIndex = dataView.getUint8(0xd5)
       this.trainerName = stringLogic.utf16BytesToString(buffer, 0xf8, 12)
       this.trainerFriendship = dataView.getUint8(0x112)
@@ -279,7 +279,7 @@ export class PK9 {
       this.gameOfOrigin = other.gameOfOrigin
       this.gameOfOriginBattle = other.gameOfOriginBattle ?? 0
       this.formArgument = other.formArgument ?? 0
-      this.affixedRibbon = other.affixedRibbon ?? 0
+      this.affixedRibbon = other.affixedRibbon ?? undefined
       this.languageIndex = other.languageIndex
       this.trainerName = other.trainerName
       this.trainerFriendship = other.trainerFriendship ?? 0
@@ -349,7 +349,7 @@ export class PK9 {
     byteLogic.setFlag(dataView, 0x22, 0, this.isFatefulEncounter)
     dataView.setUint8(0x22, this.gender)
     dataView.setUint16(0x24, this.formeNum, true)
-    types.writeStatsToBytes(dataView, 0x26, this.evs)
+    types.writeStatsToBytesU8(dataView, 0x26, this.evs)
     types.writeContestStatsToBytes(dataView, 0x2c, this.contest)
     dataView.setUint8(0x32, this.pokerusByte)
     new Uint8Array(buffer).set(new Uint8Array(this.ribbonBytes.slice(0, 8)), 0x34)
@@ -373,7 +373,7 @@ export class PK9 {
       dataView.setUint16(0x82 + i * 2, this.relearnMoves[i], true)
     }
     dataView.setUint16(0x8a, this.currentHP, true)
-    types.writeStatsToBytes(dataView, 0x8c, this.ivs)
+    types.write30BitIVsToBytes(dataView, 0x8c, this.ivs)
     byteLogic.setFlag(dataView, 0x8c, 30, this.isEgg)
     byteLogic.setFlag(dataView, 0x8c, 31, this.isNicknamed)
     dataView.setUint32(0x90, this.statusCondition, true)
@@ -389,7 +389,7 @@ export class PK9 {
     dataView.setUint8(0xce, this.gameOfOrigin)
     dataView.setUint8(0xcf, this.gameOfOriginBattle)
     dataView.setUint32(0xd0, this.formArgument, true)
-    dataView.setUint8(0xd4, this.affixedRibbon)
+    dataView.setUint8(0xd4, this.affixedRibbon === undefined ? 0xff : this.affixedRibbon)
     dataView.setUint8(0xd5, this.languageIndex)
     stringLogic.writeUTF16StringToBytes(dataView, this.trainerName, 0xf8, 12)
     dataView.setUint8(0x112, this.trainerFriendship)
@@ -442,6 +442,7 @@ export class PK9 {
   public get natureName() {
     return NatureToString(this.nature)
   }
+
   public getLevel() {
     return getLevelGen3Onward(this.dexNum, this.exp)
   }
