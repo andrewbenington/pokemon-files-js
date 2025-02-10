@@ -405,7 +405,9 @@
       "name": "metLevel",
       "type": "number",
       "byteOffset": 293,
-      "numBytes": 1
+      "numBits": 7,
+      "numBytes": 1,
+      "bitOffset": 0
     },
     {
       "name": "tmFlagsBDSP",
