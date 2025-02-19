@@ -313,12 +313,12 @@ export class PK3 {
     return 0
   }
 
-  calculateChecksum(): number {
+  calcChecksum(): number {
     return encryption.get16BitChecksumLittleEndian(this.toBytes(), 0x20, 0x50)
   }
 
   public refreshChecksum() {
-    this.checksum = this.calculateChecksum()
+    this.checksum = this.calcChecksum()
   }
 
   public toPCBytes() {
@@ -332,7 +332,7 @@ export class PK3 {
 
   // Checks to see if Pokemon is Valid and Real
   public isValid(): boolean {
-    if (this.calculateChecksum() !== this.checksum) {
+    if (this.calcChecksum() !== this.checksum) {
       return false
     }
 
