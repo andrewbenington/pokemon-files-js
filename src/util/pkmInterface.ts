@@ -139,6 +139,7 @@ export interface AllPKMFields {
   isShadow?: boolean
   getLevel: () => number
   calcChecksum?: () => number
+  refreshChecksum?: () => void
   isShiny: () => boolean
   isSquareShiny: () => boolean
   // eslint-disable-next-line no-unused-vars
