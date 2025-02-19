@@ -1,7 +1,7 @@
 use num::{self};
 
 pub fn int_from_buffer_bits_le<T>(
-    bytes: Vec<u8>,
+    bytes: &Vec<u8>,
     byte_offset: usize,
     bit_offset: u32,
     bit_count: u32,

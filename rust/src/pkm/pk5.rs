@@ -62,8 +62,8 @@ impl PK5 {
 	let ivs = Stats::from_30_bits(to_sized_array(&bytes[56..60]));
 	let is_egg = util::get_flag(&bytes, 56, 30).map_err(|e| format!("read field 'is_egg': {}", e))?;
 	let is_nicknamed = util::get_flag(&bytes, 56, 31).map_err(|e| format!("read field 'is_nicknamed': {}", e))?;
-	let gender = byteLogic.uIntFromBufferBits(dataView, 0x40, 1, 2, true);
-	let forme_num = byteLogic.uIntFromBufferBits(dataView, 0x40, 3, 5, true);
+	let gender = util::int_from_buffer_bits_le::<u8>(&bytes, 64, 1, 2).map_err(|e| format!("read field 'gender': {}", e))?;
+	let forme_num = util::int_from_buffer_bits_le::<u8>(&bytes, 64, 3, 5).map_err(|e| format!("read field 'forme_num': {}", e))?;
 	let nature = bytes[65];
 	let is_ns_pokemon = util::get_flag(&bytes, 66, 1).map_err(|e| format!("read field 'is_ns_pokemon': {}", e))?;
 	let ribbon_bytes = to_sized_array(&bytes[76..80]);
@@ -78,8 +78,8 @@ impl PK5 {
 	let status_condition = bytes[136];
 	let current_hp = bytes[142];
 	let is_fateful_encounter = util::get_flag(&bytes, 64, 0).map_err(|e| format!("read field 'is_fateful_encounter': {}", e))?;
-	let nickname = stringLogic.readGen5StringFromBytes(dataView, 0x48, 12);
-	let trainer_name = stringLogic.readGen5StringFromBytes(dataView, 0x68, 8);
+	let nickname = strings::gen5_string_from_bytes(bytes[72..96].to_vec()).map_err(|e| format!("read field 'nickname': {}", e))?;
+	let trainer_name = strings::gen5_string_from_bytes(bytes[104..120].to_vec()).map_err(|e| format!("read field 'trainer_name': {}", e))?;
 	let trainer_gender = util::get_flag(&bytes, 132, 7).map_err(|e| format!("read field 'trainer_gender': {}", e))?;
 	let checksum = u16::from_le_bytes(to_sized_array(&bytes[6..8]));
     let mon = PK5 {

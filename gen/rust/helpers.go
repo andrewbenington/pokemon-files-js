@@ -88,7 +88,7 @@ func stringFromBufferFunction(numBytes int, byteOffset int, encoding string, fie
 		return fmt.Sprintf(`strings::utf16_be_from_bytes(bytes[%d..%d].to_vec()).map_err(|e| format!("read field '%s': {}", e))?`, byteOffset, byteOffset+numBytes, fieldName)
 	}
 	if encoding == "Gen5" {
-		return fmt.Sprintf("stringLogic.readGen5StringFromBytes(dataView, 0x%x, %d)", byteOffset, numBytes/2)
+		return fmt.Sprintf(`strings::gen5_string_from_bytes(bytes[%d..%d].to_vec()).map_err(|e| format!("read field '%s': {}", e))?`, byteOffset, byteOffset+numBytes, fieldName)
 	}
 	if encoding == "Gen4" {
 		return fmt.Sprintf("stringLogic.readGen4StringFromBytes(dataView, 0x%x, %d)", byteOffset, numBytes/2)
@@ -315,7 +315,6 @@ func assignFieldToVarFromBytes(field RustField, sch schema.SchemaData) string {
 
 func assignScalarFieldToVarFromBytes(field RustField, endianness string, encoding string) string {
 	fnName := "assignScalarFieldToVarFromBytes"
-	isLittleEndian := endianness == "Little"
 	switch field.Type {
 	case "string":
 		panicIfNilNumBytes(field, fnName)
@@ -323,7 +322,17 @@ func assignScalarFieldToVarFromBytes(field RustField, endianness string, encodin
 	case "number", "number | undefined":
 		if field.Field.NumBits != nil {
 			panicIfNilBitOffset(field, fnName)
-			return fmt.Sprintf("byteLogic.uIntFromBufferBits(dataView, 0x%x, %d, %d, %t)", *field.ByteOffset, *field.BitOffset, *field.NumBits, isLittleEndian)
+			panicIfNilNumBytes(field, fnName)
+			endianLetter := strings.ToLower(endianness[:1])
+			numType := "u8"
+			if *field.NumBytes == 2 {
+				numType = "u16"
+			} else if *field.NumBytes > 2 {
+				numType = "u32"
+			}
+
+			function := fmt.Sprintf(`util::int_from_buffer_bits_%se::<%s>`, endianLetter, numType)
+			return fmt.Sprintf(`%s(&bytes, %d, %d, %d).map_err(|e| format!("read field '%s': {}", e))?`, function, *field.ByteOffset, *field.BitOffset, *field.NumBits, field.Name)
 		}
 		panicIfNilNumBytes(field, fnName)
 		return intResultFromBytesFunction(*field.NumBytes, *field.ByteOffset, endianness, field.Name)
