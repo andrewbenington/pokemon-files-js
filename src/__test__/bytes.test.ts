@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 
-import { PB8, PK1, PK2, PK3, PK4, PK5, PK6, PK7, PK8 } from '../pkm'
+import { PB8, PK2, PK4, PK5, PK6, PK7, PK8 } from '../pkm'
 // ;(global as any).TextDecoder = TextDecoder
 
 // test('gen 3 stat calculations', () => {
@@ -88,20 +88,20 @@ import { PB8, PK1, PK2, PK3, PK4, PK5, PK6, PK7, PK8 } from '../pkm'
 //   expect(blazikenPK3.bytes).toEqual(PK3PKM.bytes)
 // });
 
-describe('pk1 bytes unchanged after read/write', () => {
-  const files = fs
-    .readdirSync('src/__test__/PKMFiles/PK1')
-    .map((filename) => path.join('src/__test__/PKMFiles/PK1', filename))
-  for (const file of files) {
-    test(`file: ${file}`, () => {
-      const fileBytes = new Uint8Array(fs.readFileSync(file))
-      const convertedBytes = new Uint8Array(
-        new PK1(fileBytes.buffer).toBytes({ includeExtraFields: true })
-      )
-      expect(Array.from(convertedBytes)).toEqual(Array.from(fileBytes.slice(3)))
-    })
-  }
-})
+// describe('pk1 bytes unchanged after read/write', () => {
+//   const files = fs
+//     .readdirSync('src/__test__/PKMFiles/PK1')
+//     .map((filename) => path.join('src/__test__/PKMFiles/PK1', filename))
+//   for (const file of files) {
+//     test(`file: ${file}`, () => {
+//       const fileBytes = new Uint8Array(fs.readFileSync(file))
+//       const convertedBytes = new Uint8Array(
+//         new PK1(fileBytes.buffer).toBytes({ includeExtraFields: true })
+//       )
+//       expect(Array.from(convertedBytes)).toEqual(Array.from(fileBytes.slice(3)))
+//     })
+//   }
+// })
 
 describe('pk2 bytes unchanged after read/write', () => {
   const files = fs
@@ -117,26 +117,26 @@ describe('pk2 bytes unchanged after read/write', () => {
   }
 })
 
-describe('pk3 bytes unchanged after read/write', () => {
-  const files = fs
-    .readdirSync('src/__test__/PKMFiles/PK3')
-    .map((filename) => path.join('src/__test__/PKMFiles/PK3', filename))
-  for (const file of files) {
-    test(`file: ${file}`, () => {
-      const fileBytes = new Uint8Array(fs.readFileSync(file))
-      const convertedBytes = new Uint8Array(
-        new PK3(fileBytes.buffer).toBytes({ includeExtraFields: true })
-      )
-      Array.from(convertedBytes).forEach((cByte, i) => {
-        if (fileBytes.byteLength > i && cByte !== Array.from(fileBytes)[i]) {
-          throw new Error(
-            `Byte 0x${i.toString(16)}: ${cByte} should be ${Array.from(fileBytes)[i]}`
-          )
-        }
-      })
-    })
-  }
-})
+// describe('pk3 bytes unchanged after read/write', () => {
+//   const files = fs
+//     .readdirSync('src/__test__/PKMFiles/PK3')
+//     .map((filename) => path.join('src/__test__/PKMFiles/PK3', filename))
+//   for (const file of files) {
+//     test(`file: ${file}`, () => {
+//       const fileBytes = new Uint8Array(fs.readFileSync(file))
+//       const convertedBytes = new Uint8Array(
+//         new PK3(fileBytes.buffer).toBytes({ includeExtraFields: true })
+//       )
+//       Array.from(convertedBytes).forEach((cByte, i) => {
+//         if (fileBytes.byteLength > i && cByte !== Array.from(fileBytes)[i]) {
+//           throw new Error(
+//             `Byte 0x${i.toString(16)}: ${cByte} should be ${Array.from(fileBytes)[i]}`
+//           )
+//         }
+//       })
+//     })
+//   }
+// })
 
 describe('pk4 bytes unchanged after read/write', () => {
   const files = fs

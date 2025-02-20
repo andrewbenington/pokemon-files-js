@@ -89,8 +89,10 @@ func TypeScriptFieldFromSchemaField(sf schema.Field) (*TypeScriptField, error) {
 
 func getTypescriptType(t string) string {
 	switch t {
-	case "number", "number | undefined":
+	case "number", "float":
 		return "number"
+	case "number | undefined":
+		return "number | undefined"
 	case "string":
 		return "string"
 	case "boolean":

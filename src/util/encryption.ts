@@ -4,7 +4,9 @@ const GEN456_BLOCKS_OFFSET = 0x08
 const GEN45_BLOCK_SIZE = 0x20
 const GEN67_BLOCK_SIZE = 0x38
 const GEN8_BLOCK_SIZE = 0x50
+const GEN8_ENCRYPTED_SIZE = 8 + 4 * GEN8_BLOCK_SIZE
 const GEN8A_BLOCK_SIZE = 0x58
+const GEN8A_ENCRYPTED_SIZE = 8 + 4 * GEN8A_BLOCK_SIZE
 
 const shuffleBlockOrders = [
   [0, 1, 2, 3],
@@ -165,10 +167,14 @@ export const unshuffleBlocksGen45 = (bytes: ArrayBuffer) => {
 
 const ENCRYPTION_OFFSET = 8
 const decryptByteArray = (bytes: ArrayBuffer, seed: number, blockSize: number) => {
+  return decryptArray(bytes, seed, ENCRYPTION_OFFSET, ENCRYPTION_OFFSET + 4 * blockSize)
+}
+
+const decryptArray = (bytes: ArrayBuffer, seed: number, start: number, end: number) => {
   const unencryptedBytes = new Uint8Array(bytes)
   const dataView = new DataView(bytes)
   const newDataView = new DataView(bytes)
-  for (let i = ENCRYPTION_OFFSET; i < ENCRYPTION_OFFSET + 4 * blockSize; i += 2) {
+  for (let i = start; i < end; i += 2) {
     const bigIntSeed = BigInt(0x41c64e6d) * BigInt(seed) + BigInt(0x6073)
     seed = Number(bigIntSeed & BigInt(0xffffffff))
     const xorValue = (seed >> 16) & 0xffff
@@ -223,14 +229,36 @@ export const decryptByteArrayGen67 = (bytes: ArrayBuffer) => {
   return decryptByteArray(bytes, encryptionConstant, GEN67_BLOCK_SIZE)
 }
 
-export const decryptByteArrayGen8 = (bytes: ArrayBuffer) => {
+export function cryptPKM(bytes: ArrayBuffer, boxSize: number) {
   const encryptionConstant = new DataView(bytes).getUint32(0x00, true)
-  return decryptByteArray(bytes, encryptionConstant, GEN8_BLOCK_SIZE)
+  const boxData = bytes.slice(ENCRYPTION_OFFSET, boxSize)
+  const partyData = bytes.slice(boxSize)
+
+  return joinBuffers([
+    bytes.slice(0, ENCRYPTION_OFFSET),
+    decryptArray(boxData, encryptionConstant, 0, boxData.byteLength),
+    decryptArray(partyData, encryptionConstant, 0, partyData.byteLength),
+  ])
+}
+
+function joinBuffers(buffers: ArrayBuffer[]): ArrayBuffer {
+  const size = buffers.reduce((p, n) => (p += n.byteLength), 0)
+  const array = new Uint8Array(size)
+  let offset = 0
+  buffers.forEach((buffer) => {
+    array.set(new Uint8Array(buffer), offset)
+    offset += buffer.byteLength
+  })
+
+  return array.buffer
+}
+
+export const decryptByteArrayGen8 = (bytes: ArrayBuffer) => {
+  return cryptPKM(bytes, GEN8_ENCRYPTED_SIZE)
 }
 
 export const decryptByteArrayGen8A = (bytes: ArrayBuffer) => {
-  const encryptionConstant = new DataView(bytes).getUint32(0x00, true)
-  return decryptByteArray(bytes, encryptionConstant, GEN8A_BLOCK_SIZE)
+  return cryptPKM(bytes, GEN8A_ENCRYPTED_SIZE)
 }
 
 export const get16BitChecksumLittleEndian = (bytes: ArrayBuffer, start: number, end: number) => {
@@ -276,3 +304,14 @@ export const CRC16_CCITT = (bytes: Uint8Array, start: number, size: number) => {
 
   return sum
 }
+
+// function toHexString(byteArray: Uint8Array | ArrayBuffer) {
+//   if (!(byteArray instanceof Uint8Array)) {
+//     byteArray = new Uint8Array(byteArray)
+//   }
+//   return Array.from(byteArray as Uint8Array, function (byte) {
+//     return ('0' + (byte & 0xff).toString(16)).slice(-2)
+//   })
+//     .join('')
+//     .toUpperCase()
+// }

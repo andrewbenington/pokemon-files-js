@@ -95,8 +95,8 @@ export class PB7 {
       this.isFatefulEncounter = byteLogic.getFlag(dataView, 0x1d, 0)
       this.gender = byteLogic.uIntFromBufferBits(dataView, 0x1d, 1, 2, true)
       this.formeNum = byteLogic.uIntFromBufferBits(dataView, 0x1d, 3, 5, true)
-      this.evs = types.readStatsFromBytes(dataView, 0x1e)
-      this.avs = types.readStatsFromBytes(dataView, 0x24)
+      this.evs = types.readStatsFromBytesU8(dataView, 0x1e)
+      this.avs = types.readStatsFromBytesU8(dataView, 0x24)
       this.resortEventStatus = dataView.getUint8(0x2a)
       this.pokerusByte = dataView.getUint8(0x2b)
       this.height = dataView.getUint8(0x3a)
@@ -127,7 +127,7 @@ export class PB7 {
         dataView.getUint16(0x6e, true),
         dataView.getUint16(0x70, true),
       ]
-      this.ivs = types.readStatsFromBytes(dataView, 0x74)
+      this.ivs = types.read30BitIVsFromBytes(dataView, 0x74)
       this.isEgg = byteLogic.getFlag(dataView, 0x74, 30)
       this.isNicknamed = byteLogic.getFlag(dataView, 0x74, 31)
       this.handlerName = stringLogic.utf16BytesToString(buffer, 0x78, 12)
@@ -291,8 +291,8 @@ export class PB7 {
     byteLogic.setFlag(dataView, 0x1d, 0, this.isFatefulEncounter)
     byteLogic.uIntToBufferBits(dataView, this.gender, 29, 1, 2, true)
     byteLogic.uIntToBufferBits(dataView, this.formeNum, 29, 3, 5, true)
-    types.writeStatsToBytes(dataView, 0x1e, this.evs)
-    types.writeStatsToBytes(dataView, 0x24, this.avs)
+    types.writeStatsToBytesU8(dataView, 0x1e, this.evs)
+    types.writeStatsToBytesU8(dataView, 0x24, this.avs)
     dataView.setUint8(0x2a, this.resortEventStatus)
     dataView.setUint8(0x2b, this.pokerusByte)
     dataView.setUint8(0x3a, this.height)
@@ -311,7 +311,7 @@ export class PB7 {
     for (let i = 0; i < 4; i++) {
       dataView.setUint16(0x6a + i * 2, this.relearnMoves[i], true)
     }
-    types.writeStatsToBytes(dataView, 0x74, this.ivs)
+    types.write30BitIVsToBytes(dataView, 0x74, this.ivs)
     byteLogic.setFlag(dataView, 0x74, 30, this.isEgg)
     byteLogic.setFlag(dataView, 0x74, 31, this.isNicknamed)
     stringLogic.writeUTF16StringToBytes(dataView, this.handlerName, 0x78, 12)
@@ -361,6 +361,7 @@ export class PB7 {
   public get natureName() {
     return NatureToString(this.nature)
   }
+
   public getLevel() {
     return getLevelGen3Onward(this.dexNum, this.exp)
   }

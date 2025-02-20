@@ -62,10 +62,10 @@ export const getUnownLetterGen3 = (personalityValue: number) => {
   return letterValue % 28
 }
 
-export const generatePersonalityValuePreservingAttributes = (
-  mon: AllPKMFields,
-  prng: Prando = new Prando()
-) => {
+export const generatePersonalityValuePreservingAttributes = (mon: AllPKMFields, prng?: Prando) => {
+  if (!prng) {
+    prng = new Prando(mon.personalityValue ?? mon.ivs?.atk)
+  }
   let personalityValue = 0
   let otherNature: Nature | undefined
   let otherAbilityNum = 4

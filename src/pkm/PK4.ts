@@ -97,7 +97,7 @@ export class PK4 {
       this.abilityIndex = dataView.getUint8(0x15)
       this.markings = types.markingsSixShapesNoColorFromBytes(dataView, 0x16)
       this.languageIndex = dataView.getUint8(0x17)
-      this.evs = types.readStatsFromBytes(dataView, 0x18)
+      this.evs = types.readStatsFromBytesU8(dataView, 0x18)
       this.contest = types.readContestStatsFromBytes(dataView, 0x1e)
       this.moves = [
         dataView.getUint16(0x28, true),
@@ -312,7 +312,7 @@ export class PK4 {
     dataView.setUint8(0x15, this.abilityIndex)
     types.markingsSixShapesNoColorToBytes(dataView, 0x16, this.markings)
     dataView.setUint8(0x17, this.languageIndex)
-    types.writeStatsToBytes(dataView, 0x18, this.evs)
+    types.writeStatsToBytesU8(dataView, 0x18, this.evs)
     types.writeContestStatsToBytes(dataView, 0x1e, this.contest)
     for (let i = 0; i < 4; i++) {
       dataView.setUint16(0x28 + i * 2, this.moves[i], true)

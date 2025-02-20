@@ -67,7 +67,7 @@ export interface ContestStats {
   sheen: number
 }
 
-export function readStatsFromBytes(dataView: DataView, offset: number) {
+export function readStatsFromBytesU8(dataView: DataView, offset: number) {
   return {
     hp: dataView.getUint8(offset),
     atk: dataView.getUint8(offset + 1),
@@ -78,13 +78,33 @@ export function readStatsFromBytes(dataView: DataView, offset: number) {
   }
 }
 
-export function writeStatsToBytes(dataView: DataView, offset: number, value: Stats) {
+export function writeStatsToBytesU8(dataView: DataView, offset: number, value: Stats) {
   dataView.setUint8(offset, value.hp)
   dataView.setUint8(offset + 1, value.atk)
   dataView.setUint8(offset + 2, value.def)
   dataView.setUint8(offset + 3, value.spe)
   dataView.setUint8(offset + 4, value.spa)
   dataView.setUint8(offset + 5, value.spd)
+}
+
+export function readStatsFromBytesU16(dataView: DataView, offset: number) {
+  return {
+    hp: dataView.getUint16(offset, true),
+    atk: dataView.getUint16(offset + 2, true),
+    def: dataView.getUint16(offset + 4, true),
+    spe: dataView.getUint16(offset + 6, true),
+    spa: dataView.getUint16(offset + 8, true),
+    spd: dataView.getUint16(offset + 10, true),
+  }
+}
+
+export function writeStatsToBytesU16(dataView: DataView, offset: number, value: Stats) {
+  dataView.setUint16(offset, value.hp, true)
+  dataView.setUint16(offset + 2, value.atk, true)
+  dataView.setUint16(offset + 4, value.def, true)
+  dataView.setUint16(offset + 6, value.spe, true)
+  dataView.setUint16(offset + 8, value.spa, true)
+  dataView.setUint16(offset + 10, value.spd, true)
 }
 
 export function read30BitIVsFromBytes(dataView: DataView, offset: number): Stats {

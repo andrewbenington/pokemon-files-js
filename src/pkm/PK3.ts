@@ -103,7 +103,7 @@ export class PK3 {
         dataView.getUint8(0x36),
         dataView.getUint8(0x37),
       ]
-      this.evs = types.readStatsFromBytes(dataView, 0x38)
+      this.evs = types.readStatsFromBytesU8(dataView, 0x38)
       this.contest = types.readContestStatsFromBytes(dataView, 0x3e)
       this.pokerusByte = dataView.getUint8(0x44)
       this.metLocationIndex = dataView.getUint8(0x45)
@@ -227,7 +227,7 @@ export class PK3 {
     for (let i = 0; i < 4; i++) {
       dataView.setUint8(0x34 + i, this.movePP[i])
     }
-    types.writeStatsToBytes(dataView, 0x38, this.evs)
+    types.writeStatsToBytesU8(dataView, 0x38, this.evs)
     types.writeContestStatsToBytes(dataView, 0x3e, this.contest)
     dataView.setUint8(0x44, this.pokerusByte)
     dataView.setUint8(0x45, this.metLocationIndex)
@@ -313,12 +313,12 @@ export class PK3 {
     return 0
   }
 
-  calculateChecksum(): number {
+  calcChecksum(): number {
     return encryption.get16BitChecksumLittleEndian(this.toBytes(), 0x20, 0x50)
   }
 
   public refreshChecksum() {
-    this.checksum = this.calculateChecksum()
+    this.checksum = this.calcChecksum()
   }
 
   public toPCBytes() {
@@ -332,7 +332,7 @@ export class PK3 {
 
   // Checks to see if Pokemon is Valid and Real
   public isValid(): boolean {
-    if (this.calculateChecksum() !== this.checksum) {
+    if (this.calcChecksum() !== this.checksum) {
       return false
     }
 

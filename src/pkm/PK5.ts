@@ -17,7 +17,10 @@ import { filterRibbons } from '../util/ribbonLogic'
 import { getLevelGen3Onward, getStats } from '../util/statCalc'
 import * as stringLogic from '../util/stringConversion'
 import * as types from '../util/types'
-import { adjustMovePPBetweenFormats } from '../util/util'
+import {
+  adjustMovePPBetweenFormats,
+  generatePersonalityValuePreservingAttributes,
+} from '../util/util'
 
 export class PK5 {
   static getName() {
@@ -87,7 +90,7 @@ export class PK5 {
       this.abilityIndex = dataView.getUint8(0x15)
       this.markings = types.markingsSixShapesNoColorFromBytes(dataView, 0x16)
       this.languageIndex = dataView.getUint8(0x17)
-      this.evs = types.readStatsFromBytes(dataView, 0x18)
+      this.evs = types.readStatsFromBytesU8(dataView, 0x18)
       this.contest = types.readContestStatsFromBytes(dataView, 0x1e)
       this.moves = [
         dataView.getUint16(0x28, true),
@@ -151,7 +154,8 @@ export class PK5 {
       this.checksum = dataView.getUint16(0x6, true)
     } else {
       const other = arg
-      this.personalityValue = other.personalityValue ?? 0
+      this.personalityValue = this.personalityValue =
+        generatePersonalityValuePreservingAttributes(other) ?? 0
       this.dexNum = other.dexNum
       this.heldItemIndex = ItemFromString(other.heldItemName)
       this.trainerID = other.trainerID
@@ -255,7 +259,7 @@ export class PK5 {
     dataView.setUint8(0x15, this.abilityIndex)
     types.markingsSixShapesNoColorToBytes(dataView, 0x16, this.markings)
     dataView.setUint8(0x17, this.languageIndex)
-    types.writeStatsToBytes(dataView, 0x18, this.evs)
+    types.writeStatsToBytesU8(dataView, 0x18, this.evs)
     types.writeContestStatsToBytes(dataView, 0x1e, this.contest)
     for (let i = 0; i < 4; i++) {
       dataView.setUint16(0x28 + i * 2, this.moves[i], true)
@@ -344,6 +348,11 @@ export class PK5 {
   public get natureName() {
     return NatureToString(this.nature)
   }
+
+  public calcChecksum() {
+    return encryption.get16BitChecksumLittleEndian(this.toBytes(), 0x08, 0x87)
+  }
+
   public refreshChecksum() {
     this.checksum = encryption.get16BitChecksumLittleEndian(this.toBytes(), 0x08, 0x87)
   }
@@ -352,6 +361,7 @@ export class PK5 {
     const shuffledBytes = encryption.shuffleBlocksGen45(this.toBytes())
     return encryption.decryptByteArrayGen45(shuffledBytes)
   }
+
   public getLevel() {
     return getLevelGen3Onward(this.dexNum, this.exp)
   }

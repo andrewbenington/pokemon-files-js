@@ -240,7 +240,7 @@
     },
     {
       "name": "ivs",
-      "type": "stats",
+      "type": "ivs30Bits",
       "numBytes": 2,
       "byteOffset": 148
     },
@@ -430,7 +430,9 @@
       "name": "metLevel",
       "type": "number",
       "byteOffset": 317,
-      "numBytes": 1
+      "numBits": 7,
+      "numBytes": 1,
+      "bitOffset": 0
     },
     {
       "name": "hyperTraining",
@@ -506,11 +508,15 @@
     },
     {
       "name": "heightAbsoluteBytes",
-      "type": "Uint8Array"
+      "type": "Uint8Array",
+      "byteOffset": 172,
+      "numBytes": 4
     },
     {
       "name": "weightAbsoluteBytes",
-      "type": "Uint8Array"
+      "type": "Uint8Array",
+      "byteOffset": 176,
+      "numBytes": 4
     },
     {
       "name": "handlerMemory",
@@ -521,14 +527,22 @@
       "type": "memory"
     },
     {
-      "name": "stats",
-      "type": "stats"
-    },
-    {
       "name": "trainerGender",
       "type": "boolean",
       "byteOffset": 317,
       "bitOffset": 7
+    },
+    {
+      "name": "level",
+      "type": "number",
+      "byteOffset": 360,
+      "numBytes": 1
+    },
+    {
+      "name": "stats",
+      "type": "stats",
+      "byteOffset": 362,
+      "numBytes": 12
     }
   ],
   "stringEncoding": "UTF-16",
@@ -538,5 +552,9 @@
   "maxValidMove": 850,
   "maxRibbon": "Hisui",
   "allowedBalls": [27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37],
-  "defaultBall": "Strange"
+  "checksumStart": 8,
+  "checksumEnd": 360,
+  "defaultBall": "Strange",
+  "heightDeviation": 0.2,
+  "weightDeviation": 0.2
 }

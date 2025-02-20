@@ -5,7 +5,7 @@ export interface AllPKMFields {
   format: string
   abilityIndex?: number
   abilityNum?: number
-  affixedRibbon?: number
+  affixedRibbon?: number | undefined
   alphaMove?: number
   avs?: types.Stats
   ball?: number
@@ -52,6 +52,7 @@ export interface AllPKMFields {
   handlerMemory?: types.Memory
   handlerName?: string
   height?: number
+  heightAbsoluteBytes?: Uint8Array
   heldItemIndex: number
   homeTracker?: Uint8Array
   hyperTraining?: types.HyperTrainStats
@@ -104,6 +105,7 @@ export interface AllPKMFields {
   sociability?: number
   statLevel?: number
   statNature?: number
+  stats?: types.Stats
   statusCondition?: number
   superTrainingDistFlags?: number
   superTrainingFlags?: number
@@ -127,10 +129,17 @@ export interface AllPKMFields {
   unknownA0?: number
   unknownF3?: number
   weight?: number
+  weightAbsoluteBytes?: Uint8Array
+  heightAbsolute?: number
+  heightDeviation?: number
+  weightAbsolute?: number
+  weightDeviation?: number
   heldItemName: string
   language: string
   isShadow?: boolean
   getLevel: () => number
+  calcChecksum?: () => number
+  refreshChecksum?: () => void
   isShiny: () => boolean
   isSquareShiny: () => boolean
 

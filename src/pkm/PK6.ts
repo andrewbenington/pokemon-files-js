@@ -118,7 +118,7 @@ export class PK6 {
       this.nature = dataView.getUint8(0x1c)
       this.formeNum = byteLogic.uIntFromBufferBits(dataView, 0x1d, 3, 5, true)
       this.gender = byteLogic.uIntFromBufferBits(dataView, 0x1d, 1, 2, true)
-      this.evs = types.readStatsFromBytes(dataView, 0x1e)
+      this.evs = types.readStatsFromBytesU8(dataView, 0x1e)
       this.contest = types.readContestStatsFromBytes(dataView, 0x24)
       this.markings = types.markingsSixShapesNoColorFromBytes(dataView, 0x2a)
       this.pokerusByte = dataView.getUint8(0x2b)
@@ -374,7 +374,7 @@ export class PK6 {
     dataView.setUint8(0x1c, this.nature)
     byteLogic.uIntToBufferBits(dataView, this.formeNum, 29, 3, 5, true)
     byteLogic.uIntToBufferBits(dataView, this.gender, 29, 1, 2, true)
-    types.writeStatsToBytes(dataView, 0x1e, this.evs)
+    types.writeStatsToBytesU8(dataView, 0x1e, this.evs)
     types.writeContestStatsToBytes(dataView, 0x24, this.contest)
     types.markingsSixShapesNoColorToBytes(dataView, 0x2a, this.markings)
     dataView.setUint8(0x2b, this.pokerusByte)
@@ -466,6 +466,11 @@ export class PK6 {
   public get natureName() {
     return NatureToString(this.nature)
   }
+
+  public calcChecksum() {
+    return encryption.get16BitChecksumLittleEndian(this.toBytes(), 0x08, 0xe8)
+  }
+
   public refreshChecksum() {
     this.checksum = encryption.get16BitChecksumLittleEndian(this.toBytes(), 0x08, 0xe8)
   }
@@ -474,6 +479,7 @@ export class PK6 {
     const shuffledBytes = encryption.shuffleBlocksGen67(this.toBytes())
     return encryption.decryptByteArrayGen67(shuffledBytes)
   }
+
   public getLevel() {
     return getLevelGen3Onward(this.dexNum, this.exp)
   }

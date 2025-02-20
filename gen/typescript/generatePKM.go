@@ -164,6 +164,28 @@ export class {{ $className }} {
   {{- end }}
 {{- end }}
 
+{{- if (fieldExists .Fields "heightAbsoluteBytes")}}
+
+  public get heightAbsolute() {
+    return new DataView(this.heightAbsoluteBytes.buffer).getFloat32(0, true)
+  }
+
+  public get heightDeviation() {
+    return {{ .SchemaData.HeightDeviation }}
+  }
+{{- end }}
+
+{{- if (fieldExists .Fields "weightAbsoluteBytes")}}
+
+  public get weightAbsolute() {
+    return new DataView(this.weightAbsoluteBytes.buffer).getFloat32(0, true)
+  }
+
+  public get weightDeviation() {
+    return {{ .SchemaData.WeightDeviation }}
+  }
+{{- end }}
+
 {{- if not (fieldExists .Fields "trainerGender")}}
 
   public get trainerGender() {
@@ -260,6 +282,11 @@ export class {{ $className }} {
 
 
 {{- if not (eq (getDecryptionFunction $className) "")}}
+
+public calcChecksum() {
+  return encryption.get16BitChecksumLittleEndian(this.toBytes(), {{- hexify .SchemaData.ChecksumStart }}, {{- hexify .SchemaData.ChecksumEnd }})
+}
+
 public refreshChecksum() {
   this.checksum = encryption.get16BitChecksumLittleEndian(this.toBytes(), {{- hexify .SchemaData.ChecksumStart }}, {{- hexify .SchemaData.ChecksumEnd }})
 }
@@ -273,10 +300,12 @@ public toPCBytes() {
 
 
 {{- if fieldExists .Fields "ivs"}}
+
   public getLevel() {
     return getLevelGen3Onward(this.dexNum, this.exp)
   }
 {{- else if fieldExists .Fields "dvs"}}
+
   public getLevel() {
     return getLevelGen12(this.dexNum, this.exp)
   }

@@ -84,7 +84,7 @@ export class PA8 {
   languageIndex: number
   unknownF3: number
   formArgument: number
-  affixedRibbon: number
+  affixedRibbon: number | undefined
   trainerName: string
   trainerFriendship: number
   eggDate: types.PKMDate | undefined
@@ -103,6 +103,8 @@ export class PA8 {
   isAlpha: boolean
   isNoble: boolean
   ribbons: string[]
+  heightAbsoluteBytes: Uint8Array
+  weightAbsoluteBytes: Uint8Array
   trainerGender: boolean
   constructor(arg: ArrayBuffer | AllPKMFields, encrypted?: boolean) {
     if (arg instanceof ArrayBuffer) {
@@ -131,7 +133,7 @@ export class PA8 {
       this.flag2LA = byteLogic.getFlag(dataView, 0x22, 1)
       this.gender = dataView.getUint8(0x22)
       this.formeNum = dataView.getUint16(0x24, true)
-      this.evs = types.readStatsFromBytes(dataView, 0x26)
+      this.evs = types.readStatsFromBytesU8(dataView, 0x26)
       this.contest = types.readContestStatsFromBytes(dataView, 0x2c)
       this.pokerusByte = dataView.getUint8(0x32)
       this.ribbonBytes = new Uint8Array(buffer).slice(0x34, 0x3c)
@@ -168,13 +170,13 @@ export class PA8 {
         dataView.getUint16(0x90, true),
       ]
       this.currentHP = dataView.getUint16(0x92, true)
-      this.ivs = types.readStatsFromBytes(dataView, 0x94)
+      this.ivs = types.read30BitIVsFromBytes(dataView, 0x94)
       this.isEgg = byteLogic.getFlag(dataView, 0x94, 30)
       this.isNicknamed = byteLogic.getFlag(dataView, 0x94, 31)
       this.dynamaxLevel = dataView.getUint8(0x98)
       this.statusCondition = dataView.getUint32(0x9c, true)
       this.unknownA0 = dataView.getUint32(0xa0, true)
-      this.gvs = types.readStatsFromBytes(dataView, 0xa4)
+      this.gvs = types.readStatsFromBytesU8(dataView, 0xa4)
       this.handlerName = stringLogic.utf16BytesToString(buffer, 0xb8, 12)
       this.handlerGender = byteLogic.getFlag(dataView, 0xd2, 0)
       this.handlerLanguage = dataView.getUint8(0xd3)
@@ -190,7 +192,7 @@ export class PA8 {
       this.languageIndex = dataView.getUint8(0xf2)
       this.unknownF3 = dataView.getUint8(0xf3)
       this.formArgument = dataView.getUint32(0xf4, true)
-      this.affixedRibbon = dataView.getUint8(0xf8)
+      this.affixedRibbon = dataView.getUint8(0xf8) === 0xff ? undefined : dataView.getUint8(0xf8)
       this.trainerName = stringLogic.utf16BytesToString(buffer, 0x110, 12)
       this.trainerFriendship = dataView.getUint8(0x12a)
       this.eggDate = types.pkmDateFromBytes(dataView, 0x131)
@@ -198,7 +200,7 @@ export class PA8 {
       this.ball = dataView.getUint8(0x137)
       this.eggLocationIndex = dataView.getUint16(0x13a, true)
       this.metLocationIndex = dataView.getUint16(0x13a, true)
-      this.metLevel = dataView.getUint8(0x13d)
+      this.metLevel = byteLogic.uIntFromBufferBits(dataView, 0x13d, 0, 7, true)
       this.hyperTraining = types.readHyperTrainStatsFromBytes(dataView, 0x13e)
       this.moveFlagsLA = new Uint8Array(buffer).slice(0x13f, 0x14d)
       this.homeTracker = new Uint8Array(buffer).slice(0x14d, 0x155)
@@ -214,6 +216,8 @@ export class PA8 {
         .concat(
           byteLogic.getFlagIndexes(dataView, 0x40, 0, 47).map((index) => ModernRibbons[index + 64])
         )
+      this.heightAbsoluteBytes = new Uint8Array(buffer).slice(0xac, 0xb0)
+      this.weightAbsoluteBytes = new Uint8Array(buffer).slice(0xb0, 0xb4)
       this.trainerGender = byteLogic.getFlag(dataView, 0x13d, 7)
     } else {
       const other = arg
@@ -313,7 +317,7 @@ export class PA8 {
       this.languageIndex = other.languageIndex
       this.unknownF3 = other.unknownF3 ?? 0
       this.formArgument = other.formArgument ?? 0
-      this.affixedRibbon = other.affixedRibbon ?? 0
+      this.affixedRibbon = other.affixedRibbon ?? undefined
       this.trainerName = other.trainerName
       this.trainerFriendship = other.trainerFriendship ?? 0
       this.eggDate = other.eggDate ?? {
@@ -351,6 +355,8 @@ export class PA8 {
       this.isAlpha = other.isAlpha ?? false
       this.isNoble = other.isNoble ?? false
       this.ribbons = filterRibbons(other.ribbons ?? [], [ModernRibbons], 'Hisui') ?? []
+      this.heightAbsoluteBytes = other.heightAbsoluteBytes ?? new Uint8Array(4)
+      this.weightAbsoluteBytes = other.weightAbsoluteBytes ?? new Uint8Array(4)
       this.trainerGender = other.trainerGender
     }
   }
@@ -381,7 +387,7 @@ export class PA8 {
     byteLogic.setFlag(dataView, 0x22, 1, this.flag2LA)
     dataView.setUint8(0x22, this.gender)
     dataView.setUint16(0x24, this.formeNum, true)
-    types.writeStatsToBytes(dataView, 0x26, this.evs)
+    types.writeStatsToBytesU8(dataView, 0x26, this.evs)
     types.writeContestStatsToBytes(dataView, 0x2c, this.contest)
     dataView.setUint8(0x32, this.pokerusByte)
     new Uint8Array(buffer).set(new Uint8Array(this.ribbonBytes.slice(0, 8)), 0x34)
@@ -406,13 +412,13 @@ export class PA8 {
       dataView.setUint16(0x8a + i * 2, this.relearnMoves[i], true)
     }
     dataView.setUint16(0x92, this.currentHP, true)
-    types.writeStatsToBytes(dataView, 0x94, this.ivs)
+    types.write30BitIVsToBytes(dataView, 0x94, this.ivs)
     byteLogic.setFlag(dataView, 0x94, 30, this.isEgg)
     byteLogic.setFlag(dataView, 0x94, 31, this.isNicknamed)
     dataView.setUint8(0x98, this.dynamaxLevel)
     dataView.setUint32(0x9c, this.statusCondition, true)
     dataView.setUint32(0xa0, this.unknownA0, true)
-    types.writeStatsToBytes(dataView, 0xa4, this.gvs)
+    types.writeStatsToBytesU8(dataView, 0xa4, this.gvs)
     stringLogic.writeUTF16StringToBytes(dataView, this.handlerName, 0xb8, 12)
     byteLogic.setFlag(dataView, 0xd2, 0, this.handlerGender)
     dataView.setUint8(0xd3, this.handlerLanguage)
@@ -428,7 +434,7 @@ export class PA8 {
     dataView.setUint8(0xf2, this.languageIndex)
     dataView.setUint8(0xf3, this.unknownF3)
     dataView.setUint32(0xf4, this.formArgument, true)
-    dataView.setUint8(0xf8, this.affixedRibbon)
+    dataView.setUint8(0xf8, this.affixedRibbon === undefined ? 0xff : this.affixedRibbon)
     stringLogic.writeUTF16StringToBytes(dataView, this.trainerName, 0x110, 12)
     dataView.setUint8(0x12a, this.trainerFriendship)
     types.writePKMDateToBytes(dataView, 0x131, this.eggDate)
@@ -436,7 +442,7 @@ export class PA8 {
     dataView.setUint8(0x137, this.ball)
     dataView.setUint16(0x13a, this.eggLocationIndex, true)
     dataView.setUint16(0x13a, this.metLocationIndex, true)
-    dataView.setUint8(0x13d, this.metLevel)
+    byteLogic.uIntToBufferBits(dataView, this.metLevel, 317, 0, 7, true)
     types.writeHyperTrainStatsToBytes(dataView, 0x13e, this.hyperTraining)
     new Uint8Array(buffer).set(new Uint8Array(this.moveFlagsLA.slice(0, 14)), 0x13f)
     new Uint8Array(buffer).set(new Uint8Array(this.homeTracker.slice(0, 8)), 0x14d)
@@ -462,6 +468,8 @@ export class PA8 {
         .map((ribbon) => ModernRibbons.indexOf(ribbon) - 64)
         .filter((index) => index > -1 && index < 47)
     )
+    new Uint8Array(buffer).set(new Uint8Array(this.heightAbsoluteBytes.slice(0, 4)), 0xac)
+    new Uint8Array(buffer).set(new Uint8Array(this.weightAbsoluteBytes.slice(0, 4)), 0xb0)
     byteLogic.setFlag(dataView, 0x13d, 7, this.trainerGender)
     return buffer
   }
@@ -481,17 +489,39 @@ export class PA8 {
     return ItemToString(this.heldItemIndex)
   }
 
+  public get heightAbsolute() {
+    return new DataView(this.heightAbsoluteBytes.buffer).getFloat32(0, true)
+  }
+
+  public get heightDeviation() {
+    return 0.2
+  }
+
+  public get weightAbsolute() {
+    return new DataView(this.weightAbsoluteBytes.buffer).getFloat32(0, true)
+  }
+
+  public get weightDeviation() {
+    return 0.2
+  }
+
   public get natureName() {
     return NatureToString(this.nature)
   }
+
+  public calcChecksum() {
+    return encryption.get16BitChecksumLittleEndian(this.toBytes(), 0x08, 0x168)
+  }
+
   public refreshChecksum() {
-    this.checksum = encryption.get16BitChecksumLittleEndian(this.toBytes(), 0x00, 0x00)
+    this.checksum = encryption.get16BitChecksumLittleEndian(this.toBytes(), 0x08, 0x168)
   }
 
   public toPCBytes() {
     const shuffledBytes = encryption.shuffleBlocksGen8A(this.toBytes())
     return encryption.decryptByteArrayGen8A(shuffledBytes)
   }
+
   public getLevel() {
     return getLevelGen3Onward(this.dexNum, this.exp)
   }

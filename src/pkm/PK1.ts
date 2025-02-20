@@ -201,6 +201,7 @@ export class PK1 {
   public get formeNum() {
     return 0
   }
+
   public getLevel() {
     return getLevelGen12(this.dexNum, this.exp)
   }

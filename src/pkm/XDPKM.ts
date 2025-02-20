@@ -105,8 +105,8 @@ export class XDPKM {
         dataView.getUint8(0x85),
         dataView.getUint8(0x86),
       ]
-      this.evs = types.readStatsFromBytes(dataView, 0x9d)
-      this.ivs = types.readStatsFromBytes(dataView, 0xa9)
+      this.evs = types.readStatsFromBytesU8(dataView, 0x9d)
+      this.ivs = types.readStatsFromBytesU8(dataView, 0xa9)
       this.contest = types.readContestStatsFromBytes(dataView, 0xae)
       this.shadowID = dataView.getUint16(0xba, false)
       this.ribbons = gen3ContestRibbonsFromBytes(dataView, 0xb3).concat(
@@ -217,8 +217,8 @@ export class XDPKM {
     for (let i = 0; i < 4; i++) {
       dataView.setUint8(0x83 + i, this.movePPUps[i])
     }
-    types.writeStatsToBytes(dataView, 0x9d, this.evs)
-    types.writeStatsToBytes(dataView, 0xa9, this.ivs)
+    types.writeStatsToBytesU8(dataView, 0x9d, this.evs)
+    types.writeStatsToBytesU8(dataView, 0xa9, this.ivs)
     types.writeContestStatsToBytes(dataView, 0xae, this.contest)
     dataView.setUint16(0xba, this.shadowID, false)
     gen3ContestRibbonsToBytes(dataView, 0xb3, this.ribbons)
@@ -283,6 +283,7 @@ export class XDPKM {
     }
     return 0
   }
+
   public getLevel() {
     return getLevelGen3Onward(this.dexNum, this.exp)
   }

@@ -40,10 +40,16 @@ export interface AllPKMFields {
   {{ .Name }}?: {{ .TypesJoined }}
 	{{- end }}
 {{- end }}
+	heightAbsolute?: number
+	heightDeviation?: number
+	weightAbsolute?: number
+	weightDeviation?: number
 	heldItemName: string
 	language: string
   	isShadow?: boolean
 	getLevel: () => number
+	calcChecksum?: () => number
+	refreshChecksum?: () => void
 	isShiny: () => boolean
 	isSquareShiny: () => boolean
   	
