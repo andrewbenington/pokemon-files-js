@@ -67,9 +67,9 @@ export interface AllPKMFields {
   languageIndex: number
   level?: number
   markings?:
-    | types.MarkingsFourShapes
-    | types.MarkingsSixShapesNoColor
-    | types.MarkingsSixShapesWithColor
+  | types.MarkingsSixShapesNoColor
+  | types.MarkingsSixShapesWithColor
+  | types.MarkingsFourShapes
   masterFlagsLA?: Uint8Array
   metDate?: types.PKMDate | undefined
   metLevel?: number

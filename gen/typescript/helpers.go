@@ -99,7 +99,7 @@ func toBufferFunction(field TypeScriptField, endianness string, encoding string,
 		return intToBufferFunction(*field.NumBytes, *field.ByteOffset, endianness, variableName)
 	case "number | undefined":
 		if field.Field.NumBits != nil {
-			return fmt.Sprintf("byteLogic.uIntToBufferBits(dataView, %s ?? 0, %d, %d, %d, %t)", variableName, field.ByteOffset, field.BitOffset, *field.Field.NumBits, endianness == "Little")
+			return fmt.Sprintf("byteLogic.uIntToBufferBits(dataView, %s ?? 0, %d, %d, %d, %t)", variableName, *field.ByteOffset, *field.BitOffset, *field.Field.NumBits, endianness == "Little")
 		}
 		defaultVal := "0"
 		if field.Name == "affixedRibbon" {
@@ -107,7 +107,7 @@ func toBufferFunction(field TypeScriptField, endianness string, encoding string,
 		}
 		return intToBufferFunction(*field.NumBytes, *field.ByteOffset, endianness, fmt.Sprintf("%s === undefined ? %s : %s", variableName, defaultVal, variableName))
 	case "float":
-		return fmt.Sprintf("dataView.setFloat32(0x%x, %s, true)", field.ByteOffset, variableName)
+		return fmt.Sprintf("dataView.setFloat32(0x%x, %s, true)", *field.ByteOffset, variableName)
 	case "boolean":
 		return fmt.Sprintf("byteLogic.setFlag(dataView, 0x%x, %d, %s)", *field.ByteOffset, *field.BitOffset, variableName)
 	case "Uint8Array":
@@ -178,7 +178,7 @@ func fieldFromBufferFunction(field TypeScriptField, endianness string, encoding 
 		return intFromBufferFunction(*field.NumBytes, *field.ByteOffset, endianness)
 	case "number | undefined":
 		if field.Field.NumBits != nil {
-			return fmt.Sprintf("byteLogic.uIntFromBufferBits(dataView, 0x%x, %d, %d, %t) ?? 0", field.ByteOffset, *field.Field.BitOffset, *field.Field.NumBits, isLittleEndian)
+			return fmt.Sprintf("byteLogic.uIntFromBufferBits(dataView, 0x%x, %d, %d, %t) ?? 0", *field.ByteOffset, *field.Field.BitOffset, *field.Field.NumBits, isLittleEndian)
 		}
 		undefinedVal := "0"
 		if field.Name == "affixedRibbon" {
@@ -198,11 +198,11 @@ func fieldFromBufferFunction(field TypeScriptField, endianness string, encoding 
 		return fmt.Sprintf("types.read30BitIVsFromBytes(dataView, 0x%x)", *field.ByteOffset)
 	case "stats":
 		if *field.NumBytes == 6 {
-			return fmt.Sprintf("types.readStatsFromBytesU8(dataView, 0x%x)", field.ByteOffset)
+			return fmt.Sprintf("types.readStatsFromBytesU8(dataView, 0x%x)", *field.ByteOffset)
 		} else if *field.NumBytes == 12 {
-			return fmt.Sprintf("types.readStatsFromBytesU16(dataView, 0x%x)", field.ByteOffset)
+			return fmt.Sprintf("types.readStatsFromBytesU16(dataView, 0x%x)", *field.ByteOffset)
 		}
-		panic(fmt.Sprintf("stats field has invalid size: %d", field.NumBytes))
+		panic(fmt.Sprintf("stats field has invalid size: %d", *field.NumBytes))
 	case "statsPreSplit":
 		panicIfNilNumBytes(field, "fieldFromBufferFunction")
 		hpFunc := intFromBufferFunction(*field.NumBytes, *field.ByteOffset, endianness)
