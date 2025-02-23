@@ -27,7 +27,7 @@ func isIntType(t string) bool {
 }
 
 func rustBuildConversionMapReversed(source map[string]interface{}, keyType string, valueType string) string {
-	mapString := "return match "
+	mapString := "match "
 	if valueType == "string" {
 		mapString += "value.as_str() {"
 	} else {
@@ -79,7 +79,6 @@ func rustBuildConversionMapReversed(source map[string]interface{}, keyType strin
 		if _, ok := presentKeys[valueString]; ok {
 			continue
 		}
-		log.Println(valueType, valueString)
 		presentKeys[valueString] = true
 		pairStrings = append(pairStrings, fmt.Sprintf("%v => Some(%v),", valueString, keyString))
 	}
@@ -95,7 +94,7 @@ type Pair struct {
 }
 
 func rustBuildConversionMap(source map[string]interface{}, keyType string, valueType string) string {
-	mapString := "return match "
+	mapString := "match "
 	if keyType == "string" {
 		mapString += "key.as_str() {"
 	} else {
@@ -168,11 +167,11 @@ func getRustConversionType(t string) string {
 	return fmt.Sprintf("(TODO: getTSTypes (%s))", t)
 }
 
-const mapTemplate = `pub fn from_{{ toSnakeCase .Name }}(key: &{{ .InputType }}) -> Option<{{ .OutputType }}> {
+const mapTemplate = `pub fn decode(key: {{ .InputType }}) -> Option<{{ .OutputType }}> {
 	{{ buildFromMap .Map .InputType .OutputType }}
 }
 
-pub fn to_{{ toSnakeCase .Name }}(value: &{{ .OutputType }}) -> Option<{{ .InputType }}> {
+pub fn encode(value: {{ .OutputType }}) -> Option<{{ .InputType }}> {
 	{{ buildToMap .Map .InputType .OutputType }}
 }
 `
@@ -196,7 +195,6 @@ func generateConversions() error {
 }
 
 func generateConversion(dir string, dirEntry fs.DirEntry) error {
-	fmt.Println(dir, dirEntry)
 	data, err := os.ReadFile(dir + "/" + dirEntry.Name())
 	if err != nil {
 		return err

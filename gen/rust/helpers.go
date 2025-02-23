@@ -27,10 +27,12 @@ func panicIfNilBitOffset(field RustField, caller string) {
 
 func defaultValueByField(field RustField) string {
 	if field.Name == "nickname" {
-		return "PokemonData[this.dexNum].formes[0].name"
+		// TODO: use pokemon nickname
+		return `"NICKNAME".into()`
+		// return "PokemonData[this.dexNum].formes[0].name"
 	}
-	if field.Name == "trainerName" {
-		return `"TRAINER"`
+	if field.Name == "trainer_name" {
+		return `"TRAINER".into()`
 	}
 	switch field.Type {
 	case "Uint8Array":
@@ -58,6 +60,8 @@ func defaultValueByType(t string) string {
 		return "0"
 	case "boolean":
 		return "false"
+	case "Gender":
+		return "Gender::default()"
 	// case "pokedate", "pokedate | undefined":
 	// 	return defaultPokeDate
 	// case "stats", "ivs30Bits":
@@ -83,26 +87,42 @@ func defaultValueByType(t string) string {
 	}
 }
 
-func stringFromBufferFunction(numBytes int, byteOffset int, encoding string, fieldName string) string {
+func stringFromBytesFunction(numBytes int, byteOffset int, encoding string) string {
 	if encoding == "UTF-16" {
-		return fmt.Sprintf(`strings::utf16_be_from_bytes(bytes[%d..%d].to_vec()).map_err(|e| format!("read field '%s': {}", e))?`, byteOffset, byteOffset+numBytes, fieldName)
+		return fmt.Sprintf(`strings::utf16::from_be_bytes(bytes[%d..%d].to_vec())`, byteOffset, byteOffset+numBytes)
 	}
 	if encoding == "Gen5" {
-		return fmt.Sprintf(`strings::gen5_string_from_bytes(bytes[%d..%d].to_vec()).map_err(|e| format!("read field '%s': {}", e))?`, byteOffset, byteOffset+numBytes, fieldName)
+		return fmt.Sprintf(`Gen5String::from_bytes(to_sized_array::<[u8; %d], u8>(&bytes[%d..%d]))`, numBytes, byteOffset, byteOffset+numBytes)
 	}
 	if encoding == "Gen4" {
-		return fmt.Sprintf("stringLogic.readGen4StringFromBytes(dataView, 0x%x, %d)", byteOffset, numBytes/2)
+		return fmt.Sprintf(`Gen4String::from_bytes(to_sized_array::<[u8; %d], u8>(&bytes[%d..%d]))`, numBytes, byteOffset, byteOffset+numBytes)
 	}
 	if encoding == "Gen3" {
-		return fmt.Sprintf("stringLogic.readGen3StringFromBytes(dataView, 0x%x, %d)", byteOffset, numBytes)
+		return fmt.Sprintf("Gen3String::from_bytes(to_sized_array::<[u8; %d], u8>(&bytes[%d..%d]))", numBytes, byteOffset, byteOffset+numBytes)
 	}
 	if encoding == "GameBoy" {
-		return fmt.Sprintf("stringLogic.readGameBoyStringFromBytes(dataView, 0x%x, %d)", byteOffset, numBytes)
+		return fmt.Sprintf("GbString::from_bytes(to_sized_array::<[u8; %d], u8>(&bytes[%d..%d]))", numBytes, byteOffset, byteOffset+numBytes)
 	}
 	return fmt.Sprintf("Array.from(buffer.slice(0x%x, %d)).map(b => String.fromCharCode(b)).join('')", byteOffset, byteOffset+numBytes)
 }
 
-func intResultFromBytesFunction(numBytes int, byteOffset int, endianness string, fieldName string) string {
+func stringToBytesFunction(field string, byteOffset int, byteCount int, encoding string) string {
+	if encoding == "UTF-16" {
+		return fmt.Sprintf("bytes[%d..%d].copy_from_slice(&strings::utf16::to_be_bytes(&self.%s))", byteOffset, byteOffset+(byteCount/2), field)
+	}
+	if encoding == "Gen4" {
+		return fmt.Sprintf("bytes[%d..%d].copy_from_slice(self.%s.bytes().as_ref())", byteOffset, byteOffset+byteCount, field)
+	}
+	if encoding == "Gen3" || encoding == "Gen5" {
+		return fmt.Sprintf("bytes[%d..%d].copy_from_slice(self.%s.bytes().as_ref())", byteOffset, byteOffset+byteCount, field)
+	}
+	if encoding == "GameBoy" {
+		return fmt.Sprintf("bytes[%d..%d].copy_from_slice(self.%s.bytes().as_ref())", byteOffset, byteOffset+byteCount, field)
+	}
+	return fmt.Sprintf("new Uint8Array(buffer).set(new TextEncoder().encode(this.%s), 0x%x)", field, byteOffset)
+}
+
+func intResultFromBytesFunction(numBytes int, byteOffset int, endianness string) string {
 	isLittleEndian := endianness == "Little"
 	sliceEnd := byteOffset + numBytes
 	endianLetter := strings.ToLower(endianness[:1])
@@ -124,6 +144,21 @@ func intResultFromBytesFunction(numBytes int, byteOffset int, endianness string,
 		numType = "u32"
 	}
 	return fmt.Sprintf(`%s::from_%se_bytes(to_sized_array(&bytes[%d..%d]))`, numType, endianLetter, byteOffset, sliceEnd)
+}
+
+func intToBytesFunction(numBytes int, byteOffset int, endianness string, variableName string) string {
+	endianLetter := strings.ToLower(endianness[:1])
+	switch numBytes {
+	case 1:
+		return fmt.Sprintf("bytes[%d] = self.%s", byteOffset, variableName)
+	case 2:
+		return fmt.Sprintf("bytes[%d..%d].copy_from_slice(&self.%s.to_%se_bytes())", byteOffset, byteOffset+2, variableName, endianLetter)
+	case 3:
+		return fmt.Sprintf("new Uint8Array(buffer).set(byteLogic.uint24ToBytes%sEndian(%s), 0x%x)", endianness, variableName, byteOffset)
+	case 4:
+		return fmt.Sprintf("bytes[%d..%d].copy_from_slice(&self.%s.to_%se_bytes())", byteOffset, byteOffset+4, variableName, endianLetter)
+	}
+	return ""
 }
 
 func tupleFromBufferFunction(field RustField, endianness string) string {
@@ -152,11 +187,11 @@ func tupleFromBufferFunction(field RustField, endianness string) string {
 					bitOffset += i * (*field.NumBits)
 				}
 				function := fmt.Sprintf(`util::int_from_buffer_bits_%se::<%s>`, endianLetter, numType)
-				calledFunction := fmt.Sprintf(`%s(bytes, %d, %d, %d)`, function, byteOffset, bitOffset, *field.NumBits)
+				calledFunction := fmt.Sprintf(`%s(bytes, %d, %d, %d).map_err(|e| format!("read field '%s[%d]': {e}"))?`, function, byteOffset, bitOffset, *field.NumBits, field.Name, i)
 				elements = append(elements, calledFunction)
 			} else {
 				panicIfNilNumBytes(field, "tupleToBufferFunction")
-				elements = append(elements, intResultFromBytesFunction(*field.NumBytes, byteOffset, endianness, fmt.Sprintf("%s[%d]", field.Name, i)))
+				elements = append(elements, intResultFromBytesFunction(*field.NumBytes, byteOffset, endianness))
 			}
 			// case "marking":
 			// 	funcString += fmt.Sprintf("buffer[0x%x],\n", *field.ByteOffset+i)
@@ -289,28 +324,23 @@ func commaSeparate[T interface{}](values []T) string {
 	return fmt.Sprintf("%s]", output)
 }
 
-func assignFieldToVarFromBytes(field RustField, sch schema.SchemaData) string {
-	output := ""
-
+func fieldValueFromBytes(field RustField, sch schema.SchemaData) string {
+	assignVal := ""
 	if field.Field.NoWrite {
-		output = fmt.Sprintf("let %s = %s;", field.Name, defaultValueByField(field))
+		assignVal = defaultValueByField(field)
 	} else if field.Type == "tuple" {
-		output = fmt.Sprintf("let %s = %s;", field.Name, tupleFromBufferFunction(field, sch.Endian))
+		assignVal = tupleFromBufferFunction(field, sch.Endian)
 		// } else if field.Conversion != nil {
 		// 	output = fmt.Sprintf("this.%s = %s", field.Name, tsReadFromBufferWithConversionFunction(field, sch.Endian, sch.StringEncoding))
 	} else {
-		output = fmt.Sprintf("let %s = %s;", field.Name, assignScalarFieldToVarFromBytes(field, sch.Endian, sch.StringEncoding))
+		assignVal = assignScalarFieldToVarFromBytes(field, sch.Endian, sch.StringEncoding)
 	}
 
-	// if field.Field.LengthCheck != 0 {
-	// 	return fmt.Sprintf(`if bytes.len() > 0 {
-	// 		%s
-	// } else {
-	// 		this.%s = %s
-	// }`,
-	// 		field.Field.LengthCheck, output, field.Name, defaultValueByField(field))
-	// }
-	return output
+	if field.Field.LengthCheck != 0 {
+		return fmt.Sprintf("if bytes.len() > %d { %s } else { %s }", field.Field.LengthCheck, assignVal, defaultValueByField(field))
+	} else {
+		return assignVal
+	}
 }
 
 func assignScalarFieldToVarFromBytes(field RustField, endianness string, encoding string) string {
@@ -318,8 +348,9 @@ func assignScalarFieldToVarFromBytes(field RustField, endianness string, encodin
 	switch field.Type {
 	case "string":
 		panicIfNilNumBytes(field, fnName)
-		return stringFromBufferFunction(*field.NumBytes, *field.ByteOffset, encoding, field.Name)
+		return stringFromBytesFunction(*field.NumBytes, *field.ByteOffset, encoding)
 	case "number", "number | undefined":
+		var output string
 		if field.Field.NumBits != nil {
 			panicIfNilBitOffset(field, fnName)
 			panicIfNilNumBytes(field, fnName)
@@ -332,13 +363,22 @@ func assignScalarFieldToVarFromBytes(field RustField, endianness string, encodin
 			}
 
 			function := fmt.Sprintf(`util::int_from_buffer_bits_%se::<%s>`, endianLetter, numType)
-			return fmt.Sprintf(`%s(&bytes, %d, %d, %d).map_err(|e| format!("read field '%s': {}", e))?`, function, *field.ByteOffset, *field.BitOffset, *field.NumBits, field.Name)
+			output = fmt.Sprintf(`%s(bytes, %d, %d, %d).map_err(|e| format!("read field '%s': {e}"))?`, function, *field.ByteOffset, *field.BitOffset, *field.NumBits, field.Name)
+		} else {
+
+			panicIfNilNumBytes(field, fnName)
+			output = intResultFromBytesFunction(*field.NumBytes, *field.ByteOffset, endianness)
 		}
-		panicIfNilNumBytes(field, fnName)
-		return intResultFromBytesFunction(*field.NumBytes, *field.ByteOffset, endianness, field.Name)
+		if field.RustType == "Gender" {
+			output += ".into()"
+		}
+		return output
 	case "boolean":
 		panicIfNilBitOffset(field, fnName)
-		return fmt.Sprintf(`util::get_flag(&bytes, %d, %d).map_err(|e| format!("read field '%s': {}", e))?`, *field.ByteOffset, *field.BitOffset, field.Name)
+		if field.RustType == "Gender" {
+			return fmt.Sprintf(`util::get_flag(bytes, %d, %d).into()`, *field.ByteOffset, *field.BitOffset)
+		}
+		return fmt.Sprintf(`util::get_flag(bytes, %d, %d)`, *field.ByteOffset, *field.BitOffset)
 	case "Uint8Array":
 		panicIfNilNumBytes(field, fnName)
 		return fmt.Sprintf(`to_sized_array(&bytes[%d..%d])`, *field.ByteOffset, *field.ByteOffset+*field.NumBytes)
@@ -377,5 +417,111 @@ func assignScalarFieldToVarFromBytes(field RustField, endianness string, encodin
 		return "None"
 	default:
 		return fmt.Sprintf("(TODO: assignScalarFieldToVarFromBytes: %s)", field.Type)
+	}
+}
+
+func toBufferFunction(field RustField, endianness string, encoding string) string {
+	// if field.Type == "ribbons" {
+	// 	return ribbonsToBuffer(field)
+	// }
+
+	panicIfNilByteOffset(field, "toBufferFunction")
+	switch field.Type {
+	case "string":
+		return stringToBytesFunction(field.Name, *field.ByteOffset, *field.NumBytes, encoding)
+	case "number":
+		// if field.Field.NumBits != nil {
+		// 	return fmt.Sprintf("byteLogic.uIntToBufferBits(dataView, %s, %d, %d, %d, %t)", variableName, *field.ByteOffset, *field.BitOffset, *field.Field.NumBits, endianness == "Little")
+		// }
+		return intToBytesFunction(*field.NumBytes, *field.ByteOffset, endianness, field.Name)
+	// case "number | undefined":
+	// 	if field.Field.NumBits != nil {
+	// 		return fmt.Sprintf("byteLogic.uIntToBufferBits(dataView, %s ?? 0, %d, %d, %d, %t)", variableName, *field.ByteOffset, *field.BitOffset, *field.Field.NumBits, endianness == "Little")
+	// 	}
+	// 	defaultVal := "0"
+	// 	if field.Name == "affixed_ribbon" {
+	// 		defaultVal = "0xff"
+	// 	}
+	// 	return intToBytesFunction(*field.NumBytes, *field.ByteOffset, endianness, fmt.Sprintf("%s === undefined ? %s : %s", variableName, defaultVal, field.Name))
+	// case "float":
+	// 	return fmt.Sprintf("dataView.setFloat32(0x%x, %s, true)", *field.ByteOffset, variableName)
+	// case "boolean":
+	// 	return fmt.Sprintf("byteLogic.setFlag(dataView, 0x%x, %d, %s)", *field.ByteOffset, *field.BitOffset, variableName)
+	// case "Uint8Array":
+	// 	panicIfNilNumBytes(field, "toBufferFunction")
+	// 	return fmt.Sprintf("new Uint8Array(buffer).set(new Uint8Array(%s.slice(0, %d)), 0x%x)", variableName, *field.NumBytes, *field.ByteOffset)
+	// case "pokedate", "pokedate | undefined":
+	// 	return fmt.Sprintf("types.writePKMDateToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
+	// case "ivs30Bits":
+	// 	return fmt.Sprintf("types.write30BitIVsToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
+	// case "stats":
+	// 	if *field.NumBytes == 6 {
+	// 		return fmt.Sprintf("types.writeStatsToBytesU8(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
+	// 	} else if *field.NumBytes == 12 {
+	// 		return fmt.Sprintf("types.writeStatsToBytesU16(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
+	// 	}
+	// 	panic(fmt.Sprintf("stats field has invalid size: %d", *field.NumBytes))
+	// case "statsPreSplit":
+	// 	panicIfNilNumBytes(field, "toBufferFunction")
+	// 	atkOffset := *field.ByteOffset + *field.NumBytes
+	// 	defOffset := *field.ByteOffset + *field.NumBytes*2
+	// 	speOffset := *field.ByteOffset + *field.NumBytes*3
+	// 	spcOffset := *field.ByteOffset + *field.NumBytes*4
+	// 	return fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n",
+	// 		intToBytesFunction(2, *field.ByteOffset, endianness, fmt.Sprintf("%s.hp", variableName)),
+	// 		intToBytesFunction(2, atkOffset, endianness, fmt.Sprintf("%s.atk", variableName)),
+	// 		intToBytesFunction(2, defOffset, endianness, fmt.Sprintf("%s.def", variableName)),
+	// 		intToBytesFunction(2, speOffset, endianness, fmt.Sprintf("%s.spe", variableName)),
+	// 		intToBytesFunction(2, spcOffset, endianness, fmt.Sprintf("%s.spc", variableName)))
+	// case "dvs":
+	// 	return fmt.Sprintf("types.writeDVsToBytes(%s, dataView, 0x%x)", variableName, *field.ByteOffset)
+	// case "contestStats":
+	// 	return fmt.Sprintf("types.writeContestStatsToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
+	// case "hyperTrainStats":
+	// 	return fmt.Sprintf("types.writeHyperTrainStatsToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
+	// case "memory_3ds_trainer":
+	// 	return fmt.Sprintf("types.write3DSTrainerMemoryToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
+	// case "memory_3ds_handler":
+	// 	return fmt.Sprintf("types.write3DSHandlerMemoryToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
+	// case "memory_switch_trainer":
+	// 	return fmt.Sprintf("types.writeSwitchTrainerMemoryToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
+	// case "memory_switch_handler":
+	// 	return fmt.Sprintf("types.writeSwitchHandlerMemoryToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
+	// case "memory":
+	// 	return fmt.Sprintf("types.writeMemoryToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
+	// case "MarkingsFourShapes":
+	// 	return fmt.Sprintf("types.markingsFourShapesToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
+	// case "MarkingsSixShapesNoColor":
+	// 	return fmt.Sprintf("types.markingsSixShapesNoColorToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
+	// case "MarkingsSixShapesWithColor":
+	// 	return fmt.Sprintf("types.markingsSixShapesWithColorToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
+	default:
+		return ""
+		// return fmt.Sprintf("(TODO: toBufferFunction: %s)", field.Type)
+	}
+}
+
+func writeFieldToBytes(field RustField, sch schema.SchemaData, isParty bool) string {
+	output := ""
+
+	if field.Type == "tuple" {
+		// output = tupleToBufferFunction(field, sch.Endian)
+	} else if field.Conversion != nil {
+		// output = tsWriteToBufferWithConversionFunction(field, sch.Endian, sch.StringEncoding)
+	} else {
+		output = toBufferFunction(field, sch.Endian, sch.StringEncoding)
+	}
+
+	if output != "" {
+		if field.RustType == "Gender" {
+			output += ".into()"
+		}
+		output += ";"
+	}
+
+	if isParty == (field.Field.LengthCheck != 0) {
+		return output
+	} else {
+		return ""
 	}
 }

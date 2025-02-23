@@ -349,8 +349,8 @@ export const GBStringDict: { [key: number]: string } = {
   0xd5: 'ú',
 
   0xe0: '’',
-  0xe1: 'Pk' /* Pk */,
-  0xe2: 'Mn' /* Mn */,
+  0xe1: 'ᴘ' /* Pk */,
+  0xe2: 'ᴍ' /* Mn */,
   0xe3: '-',
   0xe6: '?',
   0xe7: '!',

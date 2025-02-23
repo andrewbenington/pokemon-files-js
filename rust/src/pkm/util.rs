@@ -1,7 +1,7 @@
 use num::{self};
 
 pub fn int_from_buffer_bits_le<T>(
-    bytes: &Vec<u8>,
+    bytes: &[u8],
     byte_offset: usize,
     bit_offset: u32,
     bit_count: u32,
@@ -35,11 +35,11 @@ where
     let bit_mask = 2_u64.pow(bit_count - 1);
     let masked: u64 = (chunk_value >> bit_offset) & bit_mask;
     let masked: T = masked.try_into()?;
-    return Ok(masked);
+    Ok(masked)
 }
 
 pub fn int_from_buffer_bits_be<T>(
-    bytes: Vec<u8>,
+    bytes: &[u8],
     byte_offset: usize,
     bit_offset: u32,
     bit_count: u32,
@@ -73,7 +73,7 @@ where
     let bit_mask = 2_u64.pow(bit_count - 1);
     let masked: u64 = (chunk_value >> bit_offset) & bit_mask;
     let masked: T = masked.try_into()?;
-    return Ok(masked);
+    Ok(masked)
 }
 // pub fn u8_from_buffer_bits<T>(
 //     bytes: Vec<u8>,
@@ -93,24 +93,17 @@ where
 //     }
 // }
 
-pub fn get_flag(bytes: &Vec<u8>, byte_offset: u32, bit_index: u32) -> Result<bool, String> {
-    println!(
-        "get_flag: length={}, offset={}, bit={}",
-        bytes.len(),
-        byte_offset,
-        bit_index
-    );
+pub fn get_flag(bytes: &[u8], byte_offset: u32, bit_index: u32) -> bool {
     let byte_index = (byte_offset + (bit_index / 8)) as usize;
-    if (byte_index as usize) >= bytes.len() {
-        return Err(format!(
+    if byte_index >= bytes.len() {
+        panic!(
             "attempting to read flag out of range (byte {} of {})",
             byte_index,
             bytes.len()
-        )
-        .to_string());
+        );
     }
     let bit_index = bit_index % 8;
-    return Ok(((bytes[byte_index] >> bit_index) & 1) == 1);
+    ((bytes[byte_index] >> bit_index) & 1) == 1
 }
 
 pub fn to_sized_array<A, T>(slice: &[T]) -> A

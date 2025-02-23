@@ -69,7 +69,8 @@
       "tupleLength": 4,
       "byteOffset": 40,
       "numBits": 2,
-      "numBytes": 1
+      "numBytes": 1,
+      "bitOffset": 0
     },
     {
       "name": "trainerFriendship",

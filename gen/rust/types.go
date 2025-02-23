@@ -51,7 +51,8 @@ func (r *RustSchemaData) AddImport(namespace string, importItem string) {
 	}
 }
 
-func RustFieldFromSchemaField(sf schema.Field) (*RustField, error) {
+func RustFieldFromSchemaField(sf schema.Field, encoding string) (*RustField, error) {
+
 	sf.Name = ToSnakeCase(sf.Name)
 	rust_field := RustField{
 		Field: sf,
@@ -86,7 +87,21 @@ func RustFieldFromSchemaField(sf schema.Field) (*RustField, error) {
 	if err != nil {
 		return nil, err
 	}
-	rust_field.RustType = rustType
+
+	if sf.Type == "string" && encoding == "GameBoy" {
+		rust_field.RustType = fmt.Sprintf("GbString<%d>", *sf.NumBytes)
+	} else if sf.Type == "string" && encoding == "Gen3" {
+		rust_field.RustType = fmt.Sprintf("Gen3String<%d>", *sf.NumBytes)
+	} else if sf.Type == "string" && encoding == "Gen4" {
+		rust_field.RustType = fmt.Sprintf("Gen4String<%d>", *sf.NumBytes)
+	} else if sf.Type == "string" && encoding == "Gen5" {
+		rust_field.RustType = fmt.Sprintf("Gen5String<%d>", *sf.NumBytes)
+	} else {
+		rust_field.RustType = rustType
+	}
+	if sf.Name == "gender" || sf.Name == "trainer_gender" {
+		rust_field.RustType = "Gender"
+	}
 
 	return &rust_field, nil
 }
