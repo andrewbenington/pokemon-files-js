@@ -130,12 +130,14 @@ func getRustType(t string, f schema.Field) (string, error) {
 		return fmt.Sprintf("[u8; %d]", *f.NumBytes), nil
 	// case "pokedate", "pokedate | undefined":
 	// 	return "types.PKMDate | undefined", nil
-	case "stats", "ivs30Bits", "hyperTrainStats":
+	case "stats", "ivs30Bits":
 		return "Stats", nil
+	case "hyperTrainStats":
+		return "HyperTraining", nil
 	case "statsPreSplit", "dvs":
 		return "StatsPreSplit", nil
-	// case "contestStats":
-	// 	return "types.ContestStats", nil
+	case "contestStats":
+		return "ContestStats", nil
 	// case "marking":
 	// 	return "types.Marking", nil
 	// case "memory", "memory_3ds_trainer", "memory_3ds_handler", "memory_switch_trainer", "memory_switch_handler":

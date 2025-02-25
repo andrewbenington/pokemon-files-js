@@ -1,6 +1,8 @@
 use crate::pkm::util::to_sized_array;
 use serde::Serialize;
 
+use super::util::bit_is_set;
+
 #[derive(Debug, Default, Serialize)]
 pub struct Stats {
     hp: u8,
@@ -23,6 +25,10 @@ impl Stats {
         }
     }
 
+    pub fn to_bytes(&self) -> [u8; 6] {
+        [self.hp, self.atk, self.def, self.spe, self.spa, self.spd]
+    }
+
     pub fn from_30_bits(bytes: [u8; 4]) -> Self {
         let iv_bytes = u32::from_le_bytes(bytes);
         Stats {
@@ -34,16 +40,37 @@ impl Stats {
             spd: ((iv_bytes >> 25) & 0x1f).try_into().unwrap(),
         }
     }
+}
 
-    pub fn from_hyper_train_bytes(bytes: [u8; 6]) -> Self {
-        Stats {
-            hp: bytes[0],
-            atk: bytes[1],
-            def: bytes[2],
-            spa: bytes[3],
-            spd: bytes[4],
-            spe: bytes[5],
+#[derive(Debug, Default, Serialize)]
+pub struct HyperTraining {
+    hp: bool,
+    atk: bool,
+    def: bool,
+    spa: bool,
+    spd: bool,
+    spe: bool,
+}
+
+impl HyperTraining {
+    pub fn from_byte(byte: u8) -> Self {
+        HyperTraining {
+            hp: bit_is_set(byte, 0),
+            atk: bit_is_set(byte, 1),
+            def: bit_is_set(byte, 2),
+            spa: bit_is_set(byte, 3),
+            spd: bit_is_set(byte, 4),
+            spe: bit_is_set(byte, 5),
         }
+    }
+
+    pub fn to_byte(&self) -> u8 {
+        (self.hp as u8)
+            | ((self.atk as u8) << 1)
+            | ((self.def as u8) << 2)
+            | ((self.spa as u8) << 3)
+            | ((self.spd as u8) << 4)
+            | ((self.spe as u8) << 5)
     }
 }
 
@@ -79,6 +106,40 @@ impl StatsPreSplit {
                 | (((dv_bytes >> 4) & 1) << 1)
                 | (dv_bytes & 1),
         }
+    }
+}
+
+#[derive(Debug, Default, Serialize)]
+pub struct ContestStats {
+    cool: u8,
+    beauty: u8,
+    cute: u8,
+    smart: u8,
+    tough: u8,
+    sheen: u8,
+}
+
+impl ContestStats {
+    pub fn from_bytes(bytes: [u8; 6]) -> Self {
+        ContestStats {
+            cool: bytes[0],
+            beauty: bytes[1],
+            cute: bytes[2],
+            smart: bytes[3],
+            tough: bytes[4],
+            sheen: bytes[5],
+        }
+    }
+
+    pub fn to_bytes(&self) -> [u8; 6] {
+        [
+            self.cool,
+            self.beauty,
+            self.cute,
+            self.smart,
+            self.tough,
+            self.sheen,
+        ]
     }
 }
 
@@ -119,5 +180,47 @@ impl From<Gender> for u8 {
             Gender::Genderless => 2,
             Gender::Error => 255,
         }
+    }
+}
+
+pub struct FlagSet<const N: usize> {
+    raw: [u8; N],
+}
+
+impl<const N: usize> FlagSet<N> {
+    pub fn from_bytes(bytes: [u8; N]) -> Self {
+        FlagSet { raw: bytes }
+    }
+
+    fn get_indices(&self) -> Vec<usize> {
+        self.raw
+            .iter()
+            .enumerate()
+            .flat_map(|(i, &byte)| {
+                let mut indices = vec![];
+                let mut remaining = byte;
+                let base = i * 8;
+
+                while remaining != 0 {
+                    let bit_pos = remaining.trailing_zeros() as usize;
+                    indices.push(base + bit_pos);
+                    remaining &= remaining - 1;
+                }
+                indices
+            })
+            .collect()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::pkm::types::FlagSet;
+
+    #[test]
+    fn flagset_indices() {
+        let flagset = FlagSet {
+            raw: [0b10010100, 0b10110010],
+        };
+        println!("{:?}", flagset.get_indices());
     }
 }

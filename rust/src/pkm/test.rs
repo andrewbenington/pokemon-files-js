@@ -6,15 +6,6 @@ use super::Pkm;
 
 mod pk4;
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        let result = 4;
-        assert_eq!(result, 4);
-    }
-}
-
 pub fn pkm_from_file_sized<const B: usize, const P: usize, PK>(filename: &str) -> Result<PK, String>
 where
     PK: Serialize + Pkm<B, P>,

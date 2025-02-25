@@ -134,6 +134,10 @@ func generateFormatClass(format string) {
 			rsFileData.AddImport("crate::pkm::types", "StatsPreSplit")
 		case "Stats":
 			rsFileData.AddImport("crate::pkm::types", "Stats")
+		case "HyperTraining":
+			rsFileData.AddImport("crate::pkm::types", "HyperTraining")
+		case "ContestStats":
+			rsFileData.AddImport("crate::pkm::types", "ContestStats")
 		}
 
 		// Add necessary imports

@@ -38,7 +38,15 @@ func generatePKMModule(formats []string) {
 	defer file.Close()
 
 	fileText := generatedMessageWithNewline
-	fileText += "pub mod util;\npub mod strings;\npub mod types;\nmod pkm;\npub use pkm::Pkm;\npub mod test;\n\n"
+	fileText += `
+	pub mod util;
+	pub mod strings;
+	pub mod types;
+	pub mod markings;
+	mod pkm;pub use pkm::Pkm;
+	pub mod test;
+	
+	`
 
 	for _, format := range formats {
 		fmtLower := strings.ToLower(format)

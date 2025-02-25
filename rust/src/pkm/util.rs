@@ -102,8 +102,12 @@ pub fn get_flag(bytes: &[u8], byte_offset: u32, bit_index: u32) -> bool {
             bytes.len()
         );
     }
-    let bit_index = bit_index % 8;
-    ((bytes[byte_index] >> bit_index) & 1) == 1
+    let bit_index: u8 = (bit_index % 8).try_into().unwrap();
+    bit_is_set(bytes[byte_index], bit_index)
+}
+
+pub fn bit_is_set(byte: u8, bit_index: u8) -> bool {
+    ((byte >> bit_index) & 1) == 1
 }
 
 pub fn to_sized_array<A, T>(slice: &[T]) -> A

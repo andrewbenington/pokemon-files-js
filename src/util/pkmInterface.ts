@@ -2,7 +2,7 @@
 import * as types from './types'
 
 export interface AllPKMFields {
-	format: string
+  format: string
   abilityIndex?: number
   abilityNum?: number
   affixedRibbon?: number | undefined
@@ -66,7 +66,10 @@ export interface AllPKMFields {
   ivs?: types.Stats
   languageIndex: number
   level?: number
-  markings?: types.MarkingsSixShapesNoColor | types.MarkingsSixShapesWithColor | types.MarkingsFourShapes
+  markings?:
+    | types.MarkingsFourShapes
+    | types.MarkingsSixShapesNoColor
+    | types.MarkingsSixShapesWithColor
   masterFlagsLA?: Uint8Array
   metDate?: types.PKMDate | undefined
   metLevel?: number
@@ -127,18 +130,18 @@ export interface AllPKMFields {
   unknownF3?: number
   weight?: number
   weightAbsoluteBytes?: Uint8Array
-	heightAbsolute?: number
-	heightDeviation?: number
-	weightAbsolute?: number
-	weightDeviation?: number
-	heldItemName: string
-	language: string
-  	isShadow?: boolean
-	getLevel: () => number
-	calcChecksum?: () => number
-	refreshChecksum?: () => void
-	isShiny: () => boolean
-	isSquareShiny: () => boolean
-  	
-	toBytes: ((_options?: types.ToBytesOptions) => ArrayBuffer) | (() => ArrayBuffer)
+  heightAbsolute?: number
+  heightDeviation?: number
+  weightAbsolute?: number
+  weightDeviation?: number
+  heldItemName: string
+  language: string
+  isShadow?: boolean
+  getLevel: () => number
+  calcChecksum?: () => number
+  refreshChecksum?: () => void
+  isShiny: () => boolean
+  isSquareShiny: () => boolean
+
+  toBytes: ((_options?: types.ToBytesOptions) => ArrayBuffer) | (() => ArrayBuffer)
 }

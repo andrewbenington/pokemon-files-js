@@ -393,7 +393,7 @@ func assignScalarFieldToVarFromBytes(field RustField, endianness string, encodin
 	case "dvs":
 		return fmt.Sprintf("StatsPreSplit::from_dv_bytes(to_sized_array(&bytes[%d..%d]))", *field.ByteOffset, *field.ByteOffset+2)
 	case "contestStats":
-		return fmt.Sprintf("types.readContestStatsFromBytes(dataView, 0x%x)", *field.ByteOffset)
+		return fmt.Sprintf("ContestStats::from_bytes(to_sized_array(&bytes[%d..%d]))", *field.ByteOffset, *field.ByteOffset+6)
 	case "memory_3ds_trainer":
 		return fmt.Sprintf("types.read3DSTrainerMemoryFromBytes(dataView, 0x%x)", *field.ByteOffset)
 	case "memory_3ds_handler":
@@ -405,7 +405,7 @@ func assignScalarFieldToVarFromBytes(field RustField, endianness string, encodin
 	case "memory":
 		return fmt.Sprintf("types.readMemoryFromBytes(dataView, 0x%x)", *field.ByteOffset)
 	case "hyperTrainStats":
-		return fmt.Sprintf("Stats::from_hyper_train_bytes(to_sized_array(&bytes[%d..%d]))", *field.ByteOffset, *field.ByteOffset+6)
+		return fmt.Sprintf("HyperTraining::from_byte(bytes[%d])", *field.ByteOffset)
 	case "MarkingsFourShapes":
 		return fmt.Sprintf("types.markingsFourShapesFromBytes(dataView, 0x%x)", *field.ByteOffset)
 	case "MarkingsSixShapesNoColor":
@@ -454,13 +454,13 @@ func toBufferFunction(field RustField, endianness string, encoding string) strin
 	// 	return fmt.Sprintf("types.writePKMDateToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
 	// case "ivs30Bits":
 	// 	return fmt.Sprintf("types.write30BitIVsToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
-	// case "stats":
-	// 	if *field.NumBytes == 6 {
-	// 		return fmt.Sprintf("types.writeStatsToBytesU8(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
-	// 	} else if *field.NumBytes == 12 {
-	// 		return fmt.Sprintf("types.writeStatsToBytesU16(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
-	// 	}
-	// 	panic(fmt.Sprintf("stats field has invalid size: %d", *field.NumBytes))
+	case "stats":
+		if *field.NumBytes == 6 {
+			return fmt.Sprintf("bytes[%d..%d].copy_from_slice(&self.%s.to_bytes())", *field.ByteOffset, *field.ByteOffset+6, field.Name)
+			// } else if *field.NumBytes == 12 {
+			// 	return fmt.Sprintf("types.writeStatsToBytesU16(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
+		}
+		// panic(fmt.Sprintf("stats field has invalid size: %d", *field.NumBytes))
 	// case "statsPreSplit":
 	// 	panicIfNilNumBytes(field, "toBufferFunction")
 	// 	atkOffset := *field.ByteOffset + *field.NumBytes
@@ -475,10 +475,10 @@ func toBufferFunction(field RustField, endianness string, encoding string) strin
 	// 		intToBytesFunction(2, spcOffset, endianness, fmt.Sprintf("%s.spc", variableName)))
 	// case "dvs":
 	// 	return fmt.Sprintf("types.writeDVsToBytes(%s, dataView, 0x%x)", variableName, *field.ByteOffset)
-	// case "contestStats":
-	// 	return fmt.Sprintf("types.writeContestStatsToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
-	// case "hyperTrainStats":
-	// 	return fmt.Sprintf("types.writeHyperTrainStatsToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
+	case "contestStats":
+		return fmt.Sprintf("bytes[%d..%d].copy_from_slice(&self.%s.to_bytes())", *field.ByteOffset, *field.ByteOffset+6, field.Name)
+	case "hyperTrainStats":
+		return fmt.Sprintf("bytes[%d] = self.%s.to_byte()", *field.ByteOffset, field.Name)
 	// case "memory_3ds_trainer":
 	// 	return fmt.Sprintf("types.write3DSTrainerMemoryToBytes(dataView, 0x%x, %s)", *field.ByteOffset, variableName)
 	// case "memory_3ds_handler":
@@ -499,6 +499,7 @@ func toBufferFunction(field RustField, endianness string, encoding string) strin
 		return ""
 		// return fmt.Sprintf("(TODO: toBufferFunction: %s)", field.Type)
 	}
+	return ""
 }
 
 func writeFieldToBytes(field RustField, sch schema.SchemaData, isParty bool) string {
