@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/andrewbenington/go-pokemon-files/gen/rust"
-	"github.com/andrewbenington/go-pokemon-files/gen/typescript"
 )
 
 var (
@@ -12,6 +11,6 @@ var (
 
 func main() {
 	// golang.Generate(formats)
-	typescript.Generate(formats)
+	// typescript.Generate(formats)
 	rust.Generate(formats)
 }

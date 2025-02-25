@@ -128,6 +128,8 @@ func getRustType(t string, f schema.Field) (string, error) {
 		return "bool", nil
 	case "Uint8Array":
 		return fmt.Sprintf("[u8; %d]", *f.NumBytes), nil
+	case "FlagSet":
+		return fmt.Sprintf("FlagSet<%d>", *f.NumBytes), nil
 	// case "pokedate", "pokedate | undefined":
 	// 	return "types.PKMDate | undefined", nil
 	case "stats", "ivs30Bits":

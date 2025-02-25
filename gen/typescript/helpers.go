@@ -110,7 +110,7 @@ func toBufferFunction(field TypeScriptField, endianness string, encoding string,
 		return fmt.Sprintf("dataView.setFloat32(0x%x, %s, true)", *field.ByteOffset, variableName)
 	case "boolean":
 		return fmt.Sprintf("byteLogic.setFlag(dataView, 0x%x, %d, %s)", *field.ByteOffset, *field.BitOffset, variableName)
-	case "Uint8Array":
+	case "Uint8Array", "FlagSet":
 		panicIfNilNumBytes(field, "toBufferFunction")
 		return fmt.Sprintf("new Uint8Array(buffer).set(new Uint8Array(%s.slice(0, %d)), 0x%x)", variableName, *field.NumBytes, *field.ByteOffset)
 	case "pokedate", "pokedate | undefined":
@@ -189,7 +189,7 @@ func fieldFromBufferFunction(field TypeScriptField, endianness string, encoding 
 	case "boolean":
 		panicIfNilBitOffset(field, "fieldFromBufferFunction")
 		return fmt.Sprintf("byteLogic.getFlag(dataView, 0x%x, %d)", *field.ByteOffset, *field.BitOffset)
-	case "Uint8Array":
+	case "Uint8Array", "FlagSet":
 		panicIfNilNumBytes(field, "fieldFromBufferFunction")
 		return fmt.Sprintf("new Uint8Array(buffer).slice(0x%x, 0x%x)", *field.ByteOffset, *field.ByteOffset+*field.NumBytes)
 	case "pokedate", "pokedate | undefined":
@@ -254,7 +254,7 @@ func defaultValueByField(field TypeScriptField) string {
 		return `"TRAINER"`
 	}
 	switch field.Type {
-	case "Uint8Array":
+	case "Uint8Array", "FlagSet":
 		panicIfNilNumBytes(field, "defaultValueByField")
 		return fmt.Sprintf("new Uint8Array(%d)", *field.NumBytes)
 	case "tuple":

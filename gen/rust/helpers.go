@@ -88,38 +88,28 @@ func defaultValueByType(t string) string {
 }
 
 func stringFromBytesFunction(numBytes int, byteOffset int, encoding string) string {
-	if encoding == "UTF-16" {
+	switch encoding {
+	case "UTF-16":
 		return fmt.Sprintf(`strings::utf16::from_be_bytes(bytes[%d..%d].to_vec())`, byteOffset, byteOffset+numBytes)
-	}
-	if encoding == "Gen5" {
+	case "Gen5":
 		return fmt.Sprintf(`Gen5String::from_bytes(to_sized_array::<[u8; %d], u8>(&bytes[%d..%d]))`, numBytes, byteOffset, byteOffset+numBytes)
-	}
-	if encoding == "Gen4" {
+	case "Gen4":
 		return fmt.Sprintf(`Gen4String::from_bytes(to_sized_array::<[u8; %d], u8>(&bytes[%d..%d]))`, numBytes, byteOffset, byteOffset+numBytes)
-	}
-	if encoding == "Gen3" {
-		return fmt.Sprintf("Gen3String::from_bytes(to_sized_array::<[u8; %d], u8>(&bytes[%d..%d]))", numBytes, byteOffset, byteOffset+numBytes)
-	}
-	if encoding == "GameBoy" {
+	case "Gen3":
+		return fmt.Sprintf(`Gen3String::from_bytes(to_sized_array::<[u8; %d], u8>(&bytes[%d..%d]))`, numBytes, byteOffset, byteOffset+numBytes)
+	case "GameBoy":
 		return fmt.Sprintf("GbString::from_bytes(to_sized_array::<[u8; %d], u8>(&bytes[%d..%d]))", numBytes, byteOffset, byteOffset+numBytes)
+	default:
+		return fmt.Sprintf("Array.from(buffer.slice(0x%x, %d)).map(b => String.fromCharCode(b)).join('')", byteOffset, byteOffset+numBytes)
 	}
-	return fmt.Sprintf("Array.from(buffer.slice(0x%x, %d)).map(b => String.fromCharCode(b)).join('')", byteOffset, byteOffset+numBytes)
 }
 
 func stringToBytesFunction(field string, byteOffset int, byteCount int, encoding string) string {
 	if encoding == "UTF-16" {
 		return fmt.Sprintf("bytes[%d..%d].copy_from_slice(&strings::utf16::to_be_bytes(&self.%s))", byteOffset, byteOffset+(byteCount/2), field)
-	}
-	if encoding == "Gen4" {
+	} else {
 		return fmt.Sprintf("bytes[%d..%d].copy_from_slice(self.%s.bytes().as_ref())", byteOffset, byteOffset+byteCount, field)
 	}
-	if encoding == "Gen3" || encoding == "Gen5" {
-		return fmt.Sprintf("bytes[%d..%d].copy_from_slice(self.%s.bytes().as_ref())", byteOffset, byteOffset+byteCount, field)
-	}
-	if encoding == "GameBoy" {
-		return fmt.Sprintf("bytes[%d..%d].copy_from_slice(self.%s.bytes().as_ref())", byteOffset, byteOffset+byteCount, field)
-	}
-	return fmt.Sprintf("new Uint8Array(buffer).set(new TextEncoder().encode(this.%s), 0x%x)", field, byteOffset)
 }
 
 func intResultFromBytesFunction(numBytes int, byteOffset int, endianness string) string {
@@ -345,6 +335,7 @@ func fieldValueFromBytes(field RustField, sch schema.SchemaData) string {
 
 func assignScalarFieldToVarFromBytes(field RustField, endianness string, encoding string) string {
 	fnName := "assignScalarFieldToVarFromBytes"
+	fmt.Printf("%s: %s\n", field.Name, field.Type)
 	switch field.Type {
 	case "string":
 		panicIfNilNumBytes(field, fnName)
@@ -382,6 +373,9 @@ func assignScalarFieldToVarFromBytes(field RustField, endianness string, encodin
 	case "Uint8Array":
 		panicIfNilNumBytes(field, fnName)
 		return fmt.Sprintf(`to_sized_array(&bytes[%d..%d])`, *field.ByteOffset, *field.ByteOffset+*field.NumBytes)
+	case "FlagSet":
+		panicIfNilNumBytes(field, fnName)
+		return fmt.Sprintf(`FlagSet::from_bytes(to_sized_array(&bytes[%d..%d]))`, *field.ByteOffset, *field.ByteOffset+*field.NumBytes)
 	case "pokedate", "pokedate | undefined":
 		return fmt.Sprintf("types.pkmDateFromBytes(dataView, 0x%x)", *field.ByteOffset)
 	case "ivs30Bits":

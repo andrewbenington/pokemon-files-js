@@ -163,7 +163,7 @@
     },
     {
       "name": "ribbonBytes",
-      "type": "Uint8Array",
+      "type": "FlagSet",
       "byteOffset": 76,
       "numBytes": 4
     },

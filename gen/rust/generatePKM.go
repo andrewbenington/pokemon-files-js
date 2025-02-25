@@ -129,15 +129,19 @@ func generateFormatClass(format string) {
 			continue
 		}
 
-		switch rField.RustType {
-		case "StatsPreSplit":
-			rsFileData.AddImport("crate::pkm::types", "StatsPreSplit")
-		case "Stats":
-			rsFileData.AddImport("crate::pkm::types", "Stats")
-		case "HyperTraining":
-			rsFileData.AddImport("crate::pkm::types", "HyperTraining")
-		case "ContestStats":
-			rsFileData.AddImport("crate::pkm::types", "ContestStats")
+		if field.Type == "FlagSet" {
+			rsFileData.AddImport("crate::pkm::types", "FlagSet")
+		} else {
+			switch rField.RustType {
+			case "StatsPreSplit":
+				rsFileData.AddImport("crate::pkm::types", "StatsPreSplit")
+			case "Stats":
+				rsFileData.AddImport("crate::pkm::types", "Stats")
+			case "HyperTraining":
+				rsFileData.AddImport("crate::pkm::types", "HyperTraining")
+			case "ContestStats":
+				rsFileData.AddImport("crate::pkm::types", "ContestStats")
+			}
 		}
 
 		// Add necessary imports

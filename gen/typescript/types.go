@@ -97,7 +97,7 @@ func getTypescriptType(t string) string {
 		return "string"
 	case "boolean":
 		return "boolean"
-	case "Uint8Array":
+	case "Uint8Array", "FlagSet":
 		return "Uint8Array"
 	case "pokedate", "pokedate | undefined":
 		return "types.PKMDate | undefined"

@@ -1,7 +1,6 @@
-use crate::pkm::util::to_sized_array;
-use serde::Serialize;
-
 use super::util::bit_is_set;
+use crate::pkm::util::to_sized_array;
+use serde::{Serialize, Serializer};
 
 #[derive(Debug, Default, Serialize)]
 pub struct Stats {
@@ -183,6 +182,7 @@ impl From<Gender> for u8 {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct FlagSet<const N: usize> {
     raw: [u8; N],
 }
@@ -209,6 +209,21 @@ impl<const N: usize> FlagSet<N> {
                 indices
             })
             .collect()
+    }
+}
+
+impl<const N: usize> Serialize for FlagSet<N> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_bytes(&self.raw)
+    }
+}
+
+impl<const N: usize> Default for FlagSet<N> {
+    fn default() -> Self {
+        Self { raw: [0; N] }
     }
 }
 
