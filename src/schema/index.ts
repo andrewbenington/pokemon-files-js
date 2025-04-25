@@ -13,7 +13,60 @@ import PK8Schema from './PK8.json'
 import PK9Schema from './PK9.json'
 import XDPKMSchema from './XDPKM.json'
 
-export const FileSchemas = {
+export type SchemaField = {
+  name?: string
+  type?: string
+  byteOffset?: number
+  numBytes?: number
+  conversion?: {
+    type: string
+    name: string
+    inputType?: string
+    outputType: string
+  }
+  noWrite?: boolean
+  default?: number
+  tupleType?: string
+  tupleLength?: number
+  endian?: string
+  bitOffset?: number
+  numBits?: number
+  seperateBytes?: boolean
+  lengthCheck?: number
+  terminateString?: boolean
+}
+
+export type Schema = {
+  fileName: string
+  fields: SchemaField[]
+  stringEncoding: string
+  endian: string
+  totalBytes: number
+  totalBytesExtraFields?: number
+  natureFromPV?: boolean
+  unownFromPV?: boolean
+  genderFromPV?: boolean
+  pvAbilityBit?: number
+  genderFromDVs?: boolean
+  unownFromIVs?: boolean
+  noFormes?: boolean
+  detectPrefix?: boolean
+  shinyFromDVs?: boolean
+  shinyThreshold?: number
+  maxValidMove: number
+  maxRibbon?: string
+  maxBall?: number
+  allowedBalls?: number[]
+  defaultBall?: string
+  checksumStart?: number
+  checksumEnd?: number
+  isGen3?: boolean
+  trainerIDTracker?: boolean
+  markingType?: string
+  memoryType?: string
+}
+
+export const FileSchemas: Record<string, Schema> = {
   PK1: PK1Schema,
   PK2: PK2Schema,
   PK3: PK3Schema,

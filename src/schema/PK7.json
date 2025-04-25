@@ -148,7 +148,7 @@
       "name": "ribbonBytes",
       "type": "FlagSet",
       "byteOffset": 48,
-      "numBytes": 4
+      "numBytes": 6
     },
     {
       "name": "contestMemoryCount",

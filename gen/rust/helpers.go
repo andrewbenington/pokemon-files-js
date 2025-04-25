@@ -259,7 +259,7 @@ func getDecryptionFunction(fileType string) string {
 		return "decryptByteArrayGen45"
 	case "PK6", "PK7":
 		return "decryptByteArrayGen67"
-	case "PK8", "PB8":
+	case "PK8", "PB8", "PK9":
 		return "decryptByteArrayGen8"
 	case "PA8":
 		return "decryptByteArrayGen8A"
