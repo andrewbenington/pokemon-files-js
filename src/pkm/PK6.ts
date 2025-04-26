@@ -123,7 +123,7 @@ export class PK6 {
       this.markings = types.markingsSixShapesNoColorFromBytes(dataView, 0x2a)
       this.pokerusByte = dataView.getUint8(0x2b)
       this.superTrainingFlags = dataView.getUint32(0x2c, true)
-      this.ribbonBytes = new Uint8Array(buffer).slice(0x30, 0x34)
+      this.ribbonBytes = new Uint8Array(buffer).slice(0x30, 0x36)
       this.contestMemoryCount = dataView.getUint8(0x38)
       this.battleMemoryCount = dataView.getUint8(0x39)
       this.superTrainingDistFlags = dataView.getUint8(0x3a)
@@ -248,7 +248,7 @@ export class PK6 {
       }
       this.pokerusByte = other.pokerusByte ?? 0
       this.superTrainingFlags = other.superTrainingFlags ?? 0
-      this.ribbonBytes = other.ribbonBytes ?? new Uint8Array(4)
+      this.ribbonBytes = other.ribbonBytes ?? new Uint8Array(6)
       this.contestMemoryCount = other.contestMemoryCount ?? 0
       this.battleMemoryCount = other.battleMemoryCount ?? 0
       this.superTrainingDistFlags = other.superTrainingDistFlags ?? 0
@@ -379,7 +379,7 @@ export class PK6 {
     types.markingsSixShapesNoColorToBytes(dataView, 0x2a, this.markings)
     dataView.setUint8(0x2b, this.pokerusByte)
     dataView.setUint32(0x2c, this.superTrainingFlags, true)
-    new Uint8Array(buffer).set(new Uint8Array(this.ribbonBytes.slice(0, 4)), 0x30)
+    new Uint8Array(buffer).set(new Uint8Array(this.ribbonBytes.slice(0, 6)), 0x30)
     dataView.setUint8(0x38, this.contestMemoryCount)
     dataView.setUint8(0x39, this.battleMemoryCount)
     dataView.setUint8(0x3a, this.superTrainingDistFlags)

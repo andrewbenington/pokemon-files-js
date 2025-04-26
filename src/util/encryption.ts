@@ -201,13 +201,13 @@ export const unshuffleBlocksGen67 = (bytes: ArrayBuffer) => {
   return unshuffleBlocks(bytes, shiftValue, GEN67_BLOCK_SIZE, GEN456_BLOCKS_OFFSET)
 }
 
-export const shuffleBlocksGen8 = (bytes: ArrayBuffer) => {
+export const shuffleBlocksGen89 = (bytes: ArrayBuffer) => {
   const encryptionConstant = new DataView(bytes).getUint32(0x00, true)
   const shiftValue = ((encryptionConstant & 0x3e000) >> 0xd) % 24
   return shuffleBlocks(bytes, shiftValue, GEN8_BLOCK_SIZE, GEN456_BLOCKS_OFFSET)
 }
 
-export const unshuffleBlocksGen8 = (bytes: ArrayBuffer) => {
+export const unshuffleBlocksGen89 = (bytes: ArrayBuffer) => {
   const encryptionConstant = new DataView(bytes).getUint32(0x00, true)
   const shiftValue = ((encryptionConstant & 0x3e000) >> 0xd) % 24
   return unshuffleBlocks(bytes, shiftValue, GEN8_BLOCK_SIZE, GEN456_BLOCKS_OFFSET)
@@ -253,7 +253,7 @@ function joinBuffers(buffers: ArrayBuffer[]): ArrayBuffer {
   return array.buffer
 }
 
-export const decryptByteArrayGen8 = (bytes: ArrayBuffer) => {
+export const decryptByteArrayGen89 = (bytes: ArrayBuffer) => {
   return cryptPKM(bytes, GEN8_ENCRYPTED_SIZE)
   // const encryptionConstant = new DataView(bytes).getUint32(0x00, true)
   // const partyDataBefore = bytes.slice(GEN8_ENCRYPTED_SIZE)

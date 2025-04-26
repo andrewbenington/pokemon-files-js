@@ -147,7 +147,7 @@
       "name": "ribbonBytes",
       "type": "Uint8Array",
       "byteOffset": 48,
-      "numBytes": 4
+      "numBytes": 6
     },
     {
       "name": "contestMemoryCount",

@@ -103,8 +103,8 @@ export class PK8 {
     if (arg instanceof ArrayBuffer) {
       let buffer = arg
       if (encrypted) {
-        const unencryptedBytes = encryption.decryptByteArrayGen8(buffer)
-        const unshuffledBytes = encryption.unshuffleBlocksGen8(unencryptedBytes)
+        const unencryptedBytes = encryption.decryptByteArrayGen89(buffer)
+        const unshuffledBytes = encryption.unshuffleBlocksGen89(unencryptedBytes)
         buffer = unshuffledBytes
       }
       const dataView = new DataView(buffer)
@@ -484,8 +484,8 @@ export class PK8 {
   }
 
   public toPCBytes() {
-    const shuffledBytes = encryption.shuffleBlocksGen8(this.toBytes())
-    return encryption.decryptByteArrayGen8(shuffledBytes)
+    const shuffledBytes = encryption.shuffleBlocksGen89(this.toBytes())
+    return encryption.decryptByteArrayGen89(shuffledBytes)
   }
 
   public getLevel() {

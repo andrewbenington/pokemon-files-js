@@ -12,6 +12,7 @@ import {
 
 import * as conversion from '../conversion'
 import * as byteLogic from '../util/byteLogic'
+import * as encryption from '../util/encryption'
 import { AllPKMFields } from '../util/pkmInterface'
 import { filterRibbons } from '../util/ribbonLogic'
 import { getLevelGen3Onward, getStats } from '../util/statCalc'
@@ -94,9 +95,14 @@ export class PK9 {
   tmFlagsSV: Uint8Array
   ribbons: string[]
   trainerGender: boolean
-  constructor(arg: ArrayBuffer | AllPKMFields) {
+  constructor(arg: ArrayBuffer | AllPKMFields, encrypted?: boolean) {
     if (arg instanceof ArrayBuffer) {
-      const buffer = arg
+      let buffer = arg
+      if (encrypted) {
+        const unencryptedBytes = encryption.decryptByteArrayGen89(buffer)
+        const unshuffledBytes = encryption.unshuffleBlocksGen89(unencryptedBytes)
+        buffer = unshuffledBytes
+      }
       const dataView = new DataView(buffer)
       this.encryptionConstant = dataView.getUint32(0x0, true)
       this.checksum = dataView.getUint16(0x6, true)
@@ -441,6 +447,19 @@ export class PK9 {
 
   public get natureName() {
     return NatureToString(this.nature)
+  }
+
+  public calcChecksum() {
+    return encryption.get16BitChecksumLittleEndian(this.toBytes(), 0x08, 0x148)
+  }
+
+  public refreshChecksum() {
+    this.checksum = encryption.get16BitChecksumLittleEndian(this.toBytes(), 0x08, 0x148)
+  }
+
+  public toPCBytes() {
+    const shuffledBytes = encryption.shuffleBlocksGen89(this.toBytes())
+    return encryption.decryptByteArrayGen89(shuffledBytes)
   }
 
   public getLevel() {
