@@ -20,6 +20,7 @@ lint: # Lint typescript files
 .PHONY: set-version
 set-version: # Update package version
 	@npm version $(VERSION) --no-git-tag-version --allow-same-version
+	@git add . && git commit -m 'bump version to $(VERSION)'
 	@npm run build
 
 .PHONY: test
