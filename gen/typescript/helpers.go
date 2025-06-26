@@ -223,6 +223,9 @@ func fieldFromBufferFunction(field TypeScriptField, endianness string, encoding 
 }
 
 func defaultValueByField(field TypeScriptField) string {
+	if field.Default != nil {
+		return *field.Default
+	}
 	if field.Name == "nickname" {
 		return "PokemonData[this.dexNum].formes[0].name"
 	}

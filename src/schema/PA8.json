@@ -419,7 +419,7 @@
       "type": "number",
       "numBytes": 2,
       "endian": "Little",
-      "byteOffset": 314
+      "byteOffset": 312
     },
     {
       "name": "metLocationIndex",

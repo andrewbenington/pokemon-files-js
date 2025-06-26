@@ -97,6 +97,8 @@ export class PB8 {
   trainerMemory: types.Memory
   hyperTraining: types.HyperTrainStats
   trainerGender: boolean
+  level: number
+  stats: types.Stats
   constructor(arg: ArrayBuffer | AllPKMFields, encrypted?: boolean) {
     if (arg instanceof ArrayBuffer) {
       let buffer = arg
@@ -201,6 +203,8 @@ export class PB8 {
       this.trainerMemory = types.readSwitchTrainerMemoryFromBytes(dataView, 0x113)
       this.hyperTraining = types.readHyperTrainStatsFromBytes(dataView, 0x126)
       this.trainerGender = byteLogic.getFlag(dataView, 0x125, 7)
+      this.level = dataView.getUint8(0x148)
+      this.stats = types.readStatsFromBytesU16(dataView, 0x14a)
     } else {
       const other = arg
       this.encryptionConstant = other.encryptionConstant ?? 0
@@ -301,7 +305,7 @@ export class PB8 {
         day: new Date().getDate(),
         year: new Date().getFullYear(),
       }
-      this.eggLocationIndex = other.eggLocationIndex ?? 0
+      this.eggLocationIndex = other.eggLocationIndex ?? 0xffff
       this.metLocationIndex = other.metLocationIndex ?? 0
       if (other.ball && PB8.maxValidBall() >= other.ball) {
         this.ball = other.ball
@@ -334,6 +338,15 @@ export class PB8 {
         spe: false,
       }
       this.trainerGender = other.trainerGender
+      this.level = other.level ?? 0
+      this.stats = other.stats ?? {
+        hp: 0,
+        atk: 0,
+        def: 0,
+        spe: 0,
+        spa: 0,
+        spd: 0,
+      }
     }
   }
 
@@ -438,6 +451,8 @@ export class PB8 {
     types.writeSwitchTrainerMemoryToBytes(dataView, 0x113, this.trainerMemory)
     types.writeHyperTrainStatsToBytes(dataView, 0x126, this.hyperTraining)
     byteLogic.setFlag(dataView, 0x125, 7, this.trainerGender)
+    dataView.setUint8(0x148, this.level)
+    types.writeStatsToBytesU16(dataView, 0x14a, this.stats)
     return buffer
   }
 
@@ -461,11 +476,11 @@ export class PB8 {
   }
 
   public calcChecksum() {
-    return encryption.get16BitChecksumLittleEndian(this.toBytes(), 0x00, 0x00)
+    return encryption.get16BitChecksumLittleEndian(this.toBytes(), 0x08, 0x148)
   }
 
   public refreshChecksum() {
-    this.checksum = encryption.get16BitChecksumLittleEndian(this.toBytes(), 0x00, 0x00)
+    this.checksum = encryption.get16BitChecksumLittleEndian(this.toBytes(), 0x08, 0x148)
   }
 
   public toPCBytes() {
