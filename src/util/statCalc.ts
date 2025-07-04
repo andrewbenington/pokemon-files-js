@@ -61,7 +61,9 @@ export const getStandardPKMStats = (mon: PKMWithStandardStats) => {
       spd: 0,
     }
   }
+
   const level = getLevelGen3Onward(mon.dexNum, mon.exp)
+
   return {
     hp: getHPGen3Onward(mon, level),
     atk: getStatGen3Onward(mon, 'atk', level),
@@ -83,6 +85,7 @@ export const getGameBoyPKMStats = (mon: PKMWithGameBoyStats) => {
       spd: 0,
     }
   }
+
   // const level = getLevelGen12(mon.dexNum, mon.exp)
   return {
     hp: 0,
@@ -98,6 +101,7 @@ export const getStatGen3Onward = (mon: PKMWithStandardStatCalc, stat: Stat, leve
   if (mon.dexNum < 1 || mon.dexNum > NationalDexMax) {
     return 0
   }
+
   const natureSummary = getNatureSummary(mon.nature)
   const natureMultiplier = natureSummary?.toLowerCase().includes(`+${stat}`)
     ? 1.1
@@ -105,14 +109,17 @@ export const getStatGen3Onward = (mon: PKMWithStandardStatCalc, stat: Stat, leve
       ? 0.9
       : 1
   const baseStats = PokemonData[mon.dexNum]?.formes[mon.formeNum]?.baseStats
+
   if (baseStats) {
     const baseStat = baseStats[stat]
     const iv = mon.ivs[stat]
     const ev = mon.evs[stat]
+
     return Math.floor(
       natureMultiplier * (Math.floor((level * (2 * baseStat + iv + Math.floor(ev / 4))) / 100) + 5)
     )
   }
+
   return 0
 }
 
@@ -120,15 +127,20 @@ export const getHPGen3Onward = (mon: PKMWithStandardStatCalc, level: number) => 
   if (mon.dexNum < 1 || mon.dexNum > NationalDexMax) {
     return 0
   }
+
   if (mon.dexNum === NationalDex.Shedinja) {
     return 1
   }
+
   const baseHP = PokemonData[mon.dexNum]?.formes[mon.formeNum]?.baseStats?.hp
+
   if (baseHP) {
     const iv = mon.ivs.hp
     const ev = mon.evs.hp
+
     return Math.floor((level * (2 * baseHP + iv + Math.floor(ev / 4))) / 100) + level + 10
   }
+
   return 0
 }
 
@@ -136,8 +148,10 @@ export const getLevelGen3Onward = (dexNum: number, exp: number) => {
   if (dexNum < 1 || dexNum > NationalDexMax) {
     return 1
   }
+
   const levelUpType = PokemonData[dexNum].levelUpType
   const cutoffList = LevelUpExp[levelUpType]
+
   return cutoffList.findIndex((minExp) => exp <= minExp) + 1
 }
 
@@ -145,30 +159,37 @@ export const getLevelGen12 = (dexNum: number, exp: number) => {
   if (dexNum > 251) {
     return 1
   }
+
   const levelUpType = PokemonData[dexNum].levelUpType
+
   for (let level = 100; level > 0; level--) {
     switch (levelUpType) {
       case 'Fast':
         if (Math.floor(0.8 * level ** 3) <= exp) {
           return level
         }
+
         break
       case 'Medium Fast':
         if (level ** 3 <= exp) {
           return level
         }
+
         break
       case 'Medium Slow':
         if (1.2 * level ** 3 - 15 * level ** 2 + 100 * level - 140 <= exp) {
           return level
         }
+
         break
       case 'Slow':
         if (Math.floor(1.25 * level ** 3) <= exp) {
           return level
         }
+
         break
     }
   }
+
   return 1
 }

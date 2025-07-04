@@ -2,7 +2,6 @@
 
 import { isGameBoy, ItemFromString, ItemToString, Languages } from 'pokemon-resources'
 import { NationalDex, PokemonData } from 'pokemon-species-data'
-
 import * as byteLogic from '../util/byteLogic'
 import { genderFromDVs } from '../util/genderCalc'
 import { AllPKMFields } from '../util/pkmInterface'
@@ -88,16 +87,19 @@ export class PK2 {
       } else {
         this.statusCondition = 0
       }
+
       if (dataView.byteLength >= 70) {
         this.currentHP = dataView.getUint8(0x22)
       } else {
         this.currentHP = 0
       }
+
       if (dataView.byteLength >= 70) {
         this.trainerName = stringLogic.readGameBoyStringFromBytes(dataView, 0x30, 8)
       } else {
         this.trainerName = 'TRAINER'
       }
+
       if (dataView.byteLength >= 70) {
         this.nickname = stringLogic.readGameBoyStringFromBytes(dataView, 0x3b, 11)
       } else {
@@ -174,6 +176,7 @@ export class PK2 {
     for (let i = 0; i < 4; i++) {
       byteLogic.uIntToBufferBits(dataView, this.movePP[i], 0x17 + i, 0, 6, false)
     }
+
     for (let i = 0; i < 4; i++) {
       byteLogic.uIntToBufferBits(dataView, this.movePPUps[i], 0x17 + i, 6, 2, false)
     }
@@ -186,12 +189,15 @@ export class PK2 {
     if (options?.includeExtraFields) {
       dataView.setUint8(0x20, this.statusCondition)
     }
+
     if (options?.includeExtraFields) {
       dataView.setUint8(0x22, this.currentHP)
     }
+
     if (options?.includeExtraFields) {
       stringLogic.writeGameBoyStringToBytes(dataView, this.trainerName, 0x30, 8, true)
     }
+
     if (options?.includeExtraFields) {
       stringLogic.writeGameBoyStringToBytes(dataView, this.nickname, 0x3b, 11, true)
     }

@@ -247,6 +247,9 @@ func fieldFromBufferFunction(field TypeScriptField, endianness string, encoding 
 }
 
 func defaultValueByField(field TypeScriptField) string {
+	if field.Default != nil {
+		return *field.Default
+	}
 	if field.Name == "nickname" {
 		return "PokemonData[this.dexNum].formes[0].name"
 	}
@@ -372,8 +375,10 @@ func defaultValueByType(t string) string {
 		return "undefined"
 	case "boolean":
 		return "false"
-	case "pokedate", "pokedate | undefined":
+	case "pokedate":
 		return defaultPokeDate
+	case "pokedate | undefined":
+		return "undefined"
 	case "stats", "ivs30Bits":
 		return defaultStats
 	case "statsPreSplit", "dvs":
@@ -637,8 +642,8 @@ func getDecryptionFunction(fileType string) string {
 		return "decryptByteArrayGen45"
 	case "PK6", "PK7":
 		return "decryptByteArrayGen67"
-	case "PK8", "PB8":
-		return "decryptByteArrayGen8"
+	case "PK8", "PB8", "PK9":
+		return "decryptByteArrayGen89"
 	case "PA8":
 		return "decryptByteArrayGen8A"
 	}
@@ -653,8 +658,8 @@ func getUnshuffleFunction(fileType string) string {
 		return "unshuffleBlocksGen45"
 	case "PK6", "PK7":
 		return "unshuffleBlocksGen67"
-	case "PK8", "PB8":
-		return "unshuffleBlocksGen8"
+	case "PK8", "PB8", "PK9":
+		return "unshuffleBlocksGen89"
 	case "PA8":
 		return "unshuffleBlocksGen8A"
 	}
@@ -669,8 +674,8 @@ func getShuffleFunction(fileType string) string {
 		return "shuffleBlocksGen45"
 	case "PK6", "PK7":
 		return "shuffleBlocksGen67"
-	case "PK8", "PB8":
-		return "shuffleBlocksGen8"
+	case "PK8", "PB8", "PK9":
+		return "shuffleBlocksGen89"
 	case "PA8":
 		return "shuffleBlocksGen8A"
 	}

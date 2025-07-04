@@ -11,7 +11,6 @@ import {
   NatureToString,
 } from 'pokemon-resources'
 import { NationalDex, PokemonData } from 'pokemon-species-data'
-
 import * as byteLogic from '../util/byteLogic'
 import { genderFromPID } from '../util/genderCalc'
 import { AllPKMFields } from '../util/pkmInterface'
@@ -208,9 +207,11 @@ export class COLOPKM {
     for (let i = 0; i < 4; i++) {
       dataView.setUint16(0x78 + i * 2, this.moves[i], false)
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint8(0x7a + i, this.movePP[i])
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint8(0x7b + i, this.movePPUps[i])
     }

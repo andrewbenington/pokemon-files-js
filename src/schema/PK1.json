@@ -4,7 +4,7 @@
   "fileName": "PK1",
   "fields": [
     { "name": "gameOfOrigin", "type": "number", "noWrite": true },
-    { "name": "personalityValue", "type": "number", "noWrite": true, "default": -1 },
+    { "name": "personalityValue", "type": "number", "noWrite": true },
     {
       "name": "languageIndex",
       "type": "number",

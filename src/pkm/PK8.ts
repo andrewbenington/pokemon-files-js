@@ -9,7 +9,6 @@ import {
   ModernRibbons,
   NatureToString,
 } from 'pokemon-resources'
-
 import * as byteLogic from '../util/byteLogic'
 import * as encryption from '../util/encryption'
 import { AllPKMFields } from '../util/pkmInterface'
@@ -103,8 +102,8 @@ export class PK8 {
     if (arg instanceof ArrayBuffer) {
       let buffer = arg
       if (encrypted) {
-        const unencryptedBytes = encryption.decryptByteArrayGen8(buffer)
-        const unshuffledBytes = encryption.unshuffleBlocksGen8(unencryptedBytes)
+        const unencryptedBytes = encryption.decryptByteArrayGen89(buffer)
+        const unshuffledBytes = encryption.unshuffleBlocksGen89(unencryptedBytes)
         buffer = unshuffledBytes
       }
       const dataView = new DataView(buffer)
@@ -125,7 +124,7 @@ export class PK8 {
       this.nature = dataView.getUint8(0x20)
       this.statNature = dataView.getUint8(0x21)
       this.isFatefulEncounter = byteLogic.getFlag(dataView, 0x22, 0)
-      this.gender = dataView.getUint8(0x22)
+      this.gender = byteLogic.uIntFromBufferBits(dataView, 0x22, 2, 2, true)
       this.formeNum = dataView.getUint16(0x24, true)
       this.evs = types.readStatsFromBytesU8(dataView, 0x26)
       this.contest = types.readContestStatsFromBytes(dataView, 0x2c)
@@ -295,11 +294,7 @@ export class PK8 {
       this.affixedRibbon = other.affixedRibbon ?? undefined
       this.trainerName = other.trainerName
       this.trainerFriendship = other.trainerFriendship ?? 0
-      this.eggDate = other.eggDate ?? {
-        month: new Date().getMonth(),
-        day: new Date().getDate(),
-        year: new Date().getFullYear(),
-      }
+      this.eggDate = other.eggDate ?? undefined
       this.metDate = other.metDate ?? {
         month: new Date().getMonth(),
         day: new Date().getDate(),
@@ -375,7 +370,7 @@ export class PK8 {
     dataView.setUint8(0x20, this.nature)
     dataView.setUint8(0x21, this.statNature)
     byteLogic.setFlag(dataView, 0x22, 0, this.isFatefulEncounter)
-    dataView.setUint8(0x22, this.gender)
+    byteLogic.uIntToBufferBits(dataView, this.gender, 34, 2, 2, true)
     dataView.setUint16(0x24, this.formeNum, true)
     types.writeStatsToBytesU8(dataView, 0x26, this.evs)
     types.writeContestStatsToBytes(dataView, 0x2c, this.contest)
@@ -390,12 +385,15 @@ export class PK8 {
     for (let i = 0; i < 4; i++) {
       dataView.setUint16(0x72 + i * 2, this.moves[i], true)
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint8(0x7a + i, this.movePP[i])
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint8(0x7e + i, this.movePPUps[i])
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint16(0x82 + i * 2, this.relearnMoves[i], true)
     }
@@ -484,8 +482,8 @@ export class PK8 {
   }
 
   public toPCBytes() {
-    const shuffledBytes = encryption.shuffleBlocksGen8(this.toBytes())
-    return encryption.decryptByteArrayGen8(shuffledBytes)
+    const shuffledBytes = encryption.shuffleBlocksGen89(this.toBytes())
+    return encryption.decryptByteArrayGen89(shuffledBytes)
   }
 
   public getLevel() {

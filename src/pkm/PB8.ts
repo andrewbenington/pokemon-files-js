@@ -9,7 +9,6 @@ import {
   ModernRibbons,
   NatureToString,
 } from 'pokemon-resources'
-
 import * as byteLogic from '../util/byteLogic'
 import * as encryption from '../util/encryption'
 import { AllPKMFields } from '../util/pkmInterface'
@@ -85,7 +84,7 @@ export class PB8 {
   trainerFriendship: number
   eggDate: types.PKMDate | undefined
   metDate: types.PKMDate | undefined
-  eggLocationIndex: number
+  eggLocationIndexInternal: number = 0xffff
   metLocationIndex: number
   ball: number
   metLevel: number
@@ -97,12 +96,14 @@ export class PB8 {
   trainerMemory: types.Memory
   hyperTraining: types.HyperTrainStats
   trainerGender: boolean
+  level: number
+  stats: types.Stats
   constructor(arg: ArrayBuffer | AllPKMFields, encrypted?: boolean) {
     if (arg instanceof ArrayBuffer) {
       let buffer = arg
       if (encrypted) {
-        const unencryptedBytes = encryption.decryptByteArrayGen8(buffer)
-        const unshuffledBytes = encryption.unshuffleBlocksGen8(unencryptedBytes)
+        const unencryptedBytes = encryption.decryptByteArrayGen89(buffer)
+        const unshuffledBytes = encryption.unshuffleBlocksGen89(unencryptedBytes)
         buffer = unshuffledBytes
       }
       const dataView = new DataView(buffer)
@@ -123,7 +124,7 @@ export class PB8 {
       this.nature = dataView.getUint8(0x20)
       this.statNature = dataView.getUint8(0x21)
       this.isFatefulEncounter = byteLogic.getFlag(dataView, 0x22, 0)
-      this.gender = dataView.getUint8(0x22)
+      this.gender = byteLogic.uIntFromBufferBits(dataView, 0x22, 2, 2, true)
       this.formeNum = dataView.getUint16(0x24, true)
       this.evs = types.readStatsFromBytesU8(dataView, 0x26)
       this.contest = types.readContestStatsFromBytes(dataView, 0x2c)
@@ -184,7 +185,7 @@ export class PB8 {
       this.trainerFriendship = dataView.getUint8(0x112)
       this.eggDate = types.pkmDateFromBytes(dataView, 0x119)
       this.metDate = types.pkmDateFromBytes(dataView, 0x11c)
-      this.eggLocationIndex = dataView.getUint16(0x120, true)
+      this.eggLocationIndexInternal = dataView.getUint16(0x120, true)
       this.metLocationIndex = dataView.getUint16(0x122, true)
       this.ball = dataView.getUint8(0x124)
       this.metLevel = byteLogic.uIntFromBufferBits(dataView, 0x125, 0, 7, true)
@@ -201,6 +202,8 @@ export class PB8 {
       this.trainerMemory = types.readSwitchTrainerMemoryFromBytes(dataView, 0x113)
       this.hyperTraining = types.readHyperTrainStatsFromBytes(dataView, 0x126)
       this.trainerGender = byteLogic.getFlag(dataView, 0x125, 7)
+      this.level = dataView.getUint8(0x148)
+      this.stats = types.readStatsFromBytesU16(dataView, 0x14a)
     } else {
       const other = arg
       this.encryptionConstant = other.encryptionConstant ?? 0
@@ -291,11 +294,7 @@ export class PB8 {
       this.affixedRibbon = other.affixedRibbon ?? undefined
       this.trainerName = other.trainerName
       this.trainerFriendship = other.trainerFriendship ?? 0
-      this.eggDate = other.eggDate ?? {
-        month: new Date().getMonth(),
-        day: new Date().getDate(),
-        year: new Date().getFullYear(),
-      }
+      this.eggDate = other.eggDate ?? undefined
       this.metDate = other.metDate ?? {
         month: new Date().getMonth(),
         day: new Date().getDate(),
@@ -303,6 +302,7 @@ export class PB8 {
       }
       this.eggLocationIndex = other.eggLocationIndex ?? 0
       this.metLocationIndex = other.metLocationIndex ?? 0
+
       if (other.ball && PB8.maxValidBall() >= other.ball) {
         this.ball = other.ball
       } else {
@@ -334,6 +334,15 @@ export class PB8 {
         spe: false,
       }
       this.trainerGender = other.trainerGender
+      this.level = other.level ?? 0
+      this.stats = other.stats ?? {
+        hp: 0,
+        atk: 0,
+        def: 0,
+        spe: 0,
+        spa: 0,
+        spd: 0,
+      }
     }
   }
 
@@ -362,7 +371,7 @@ export class PB8 {
     dataView.setUint8(0x20, this.nature)
     dataView.setUint8(0x21, this.statNature)
     byteLogic.setFlag(dataView, 0x22, 0, this.isFatefulEncounter)
-    dataView.setUint8(0x22, this.gender)
+    byteLogic.uIntToBufferBits(dataView, this.gender, 34, 2, 2, true)
     dataView.setUint16(0x24, this.formeNum, true)
     types.writeStatsToBytesU8(dataView, 0x26, this.evs)
     types.writeContestStatsToBytes(dataView, 0x2c, this.contest)
@@ -377,12 +386,15 @@ export class PB8 {
     for (let i = 0; i < 4; i++) {
       dataView.setUint16(0x72 + i * 2, this.moves[i], true)
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint8(0x7a + i, this.movePP[i])
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint8(0x7e + i, this.movePPUps[i])
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint16(0x82 + i * 2, this.relearnMoves[i], true)
     }
@@ -411,7 +423,7 @@ export class PB8 {
     dataView.setUint8(0x112, this.trainerFriendship)
     types.writePKMDateToBytes(dataView, 0x119, this.eggDate)
     types.writePKMDateToBytes(dataView, 0x11c, this.metDate)
-    dataView.setUint16(0x120, this.eggLocationIndex, true)
+    dataView.setUint16(0x120, this.eggLocationIndexInternal, true)
     dataView.setUint16(0x122, this.metLocationIndex, true)
     dataView.setUint8(0x124, this.ball)
     byteLogic.uIntToBufferBits(dataView, this.metLevel, 293, 0, 7, true)
@@ -438,6 +450,8 @@ export class PB8 {
     types.writeSwitchTrainerMemoryToBytes(dataView, 0x113, this.trainerMemory)
     types.writeHyperTrainStatsToBytes(dataView, 0x126, this.hyperTraining)
     byteLogic.setFlag(dataView, 0x125, 7, this.trainerGender)
+    dataView.setUint8(0x148, this.level)
+    types.writeStatsToBytesU16(dataView, 0x14a, this.stats)
     return buffer
   }
 
@@ -460,17 +474,25 @@ export class PB8 {
     return NatureToString(this.nature)
   }
 
+  public get eggLocationIndex() {
+    return this.eggLocationIndexInternal === 0xffff ? 0 : this.eggLocationIndexInternal
+  }
+
+  public set eggLocationIndex(value: number) {
+    this.eggLocationIndexInternal = value === 0 ? 0xffff : value
+  }
+
   public calcChecksum() {
-    return encryption.get16BitChecksumLittleEndian(this.toBytes(), 0x00, 0x00)
+    return encryption.get16BitChecksumLittleEndian(this.toBytes(), 0x08, 0x148)
   }
 
   public refreshChecksum() {
-    this.checksum = encryption.get16BitChecksumLittleEndian(this.toBytes(), 0x00, 0x00)
+    this.checksum = encryption.get16BitChecksumLittleEndian(this.toBytes(), 0x08, 0x148)
   }
 
   public toPCBytes() {
-    const shuffledBytes = encryption.shuffleBlocksGen8(this.toBytes())
-    return encryption.decryptByteArrayGen8(shuffledBytes)
+    const shuffledBytes = encryption.shuffleBlocksGen89(this.toBytes())
+    return encryption.decryptByteArrayGen89(shuffledBytes)
   }
 
   public getLevel() {

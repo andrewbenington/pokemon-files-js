@@ -67,9 +67,9 @@ export interface AllPKMFields {
   languageIndex: number
   level?: number
   markings?:
-    | types.MarkingsFourShapes
-    | types.MarkingsSixShapesNoColor
-    | types.MarkingsSixShapesWithColor
+  | types.MarkingsFourShapes
+  | types.MarkingsSixShapesNoColor
+  | types.MarkingsSixShapesWithColor
   masterFlagsLA?: Uint8Array
   metDate?: types.PKMDate | undefined
   metLevel?: number
@@ -143,5 +143,5 @@ export interface AllPKMFields {
   isShiny: () => boolean
   isSquareShiny: () => boolean
 
-  toBytes: ((_options?: types.ToBytesOptions) => ArrayBuffer) | (() => ArrayBuffer)
+  toBytes: ((options?: types.ToBytesOptions) => ArrayBuffer) | (() => ArrayBuffer)
 }

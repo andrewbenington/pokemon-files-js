@@ -9,7 +9,6 @@ import {
   ModernRibbons,
   NatureToString,
 } from 'pokemon-resources'
-
 import * as byteLogic from '../util/byteLogic'
 import * as encryption from '../util/encryption'
 import { AllPKMFields } from '../util/pkmInterface'
@@ -122,7 +121,7 @@ export class PK7 {
       this.resortEventStatus = dataView.getUint8(0x2a)
       this.pokerusByte = dataView.getUint8(0x2b)
       this.superTrainingFlags = dataView.getUint32(0x2c, true)
-      this.ribbonBytes = new Uint8Array(buffer).slice(0x30, 0x34)
+      this.ribbonBytes = new Uint8Array(buffer).slice(0x30, 0x36)
       this.contestMemoryCount = dataView.getUint8(0x38)
       this.battleMemoryCount = dataView.getUint8(0x39)
       this.superTrainingDistFlags = dataView.getUint8(0x3a)
@@ -191,6 +190,7 @@ export class PK7 {
       } else {
         this.statusCondition = 0
       }
+
       if (dataView.byteLength >= 260) {
         this.currentHP = dataView.getUint8(0xf0)
       } else {
@@ -246,7 +246,7 @@ export class PK7 {
       this.resortEventStatus = other.resortEventStatus ?? 0
       this.pokerusByte = other.pokerusByte ?? 0
       this.superTrainingFlags = other.superTrainingFlags ?? 0
-      this.ribbonBytes = other.ribbonBytes ?? new Uint8Array(4)
+      this.ribbonBytes = other.ribbonBytes ?? new Uint8Array(6)
       this.contestMemoryCount = other.contestMemoryCount ?? 0
       this.battleMemoryCount = other.battleMemoryCount ?? 0
       this.superTrainingDistFlags = other.superTrainingDistFlags ?? 0
@@ -304,11 +304,7 @@ export class PK7 {
       this.trainerName = other.trainerName
       this.trainerFriendship = other.trainerFriendship ?? 0
       this.trainerAffection = other.trainerAffection ?? 0
-      this.eggDate = other.eggDate ?? {
-        month: new Date().getMonth(),
-        day: new Date().getDate(),
-        year: new Date().getFullYear(),
-      }
+      this.eggDate = other.eggDate ?? undefined
       this.metDate = other.metDate ?? {
         month: new Date().getMonth(),
         day: new Date().getDate(),
@@ -383,7 +379,7 @@ export class PK7 {
     dataView.setUint8(0x2a, this.resortEventStatus)
     dataView.setUint8(0x2b, this.pokerusByte)
     dataView.setUint32(0x2c, this.superTrainingFlags, true)
-    new Uint8Array(buffer).set(new Uint8Array(this.ribbonBytes.slice(0, 4)), 0x30)
+    new Uint8Array(buffer).set(new Uint8Array(this.ribbonBytes.slice(0, 6)), 0x30)
     dataView.setUint8(0x38, this.contestMemoryCount)
     dataView.setUint8(0x39, this.battleMemoryCount)
     dataView.setUint8(0x3a, this.superTrainingDistFlags)
@@ -392,12 +388,15 @@ export class PK7 {
     for (let i = 0; i < 4; i++) {
       dataView.setUint16(0x5a + i * 2, this.moves[i], true)
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint8(0x62 + i, this.movePP[i])
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint8(0x66 + i, this.movePPUps[i])
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint16(0x6a + i * 2, this.relearnMoves[i], true)
     }
@@ -434,6 +433,7 @@ export class PK7 {
     if (options?.includeExtraFields) {
       dataView.setUint8(0xe8, this.statusCondition)
     }
+
     if (options?.includeExtraFields) {
       dataView.setUint8(0xf0, this.currentHP)
     }

@@ -9,9 +9,9 @@ import {
   ModernRibbons,
   NatureToString,
 } from 'pokemon-resources'
-
 import * as conversion from '../conversion'
 import * as byteLogic from '../util/byteLogic'
+import * as encryption from '../util/encryption'
 import { AllPKMFields } from '../util/pkmInterface'
 import { filterRibbons } from '../util/ribbonLogic'
 import { getLevelGen3Onward, getStats } from '../util/statCalc'
@@ -94,9 +94,14 @@ export class PK9 {
   tmFlagsSV: Uint8Array
   ribbons: string[]
   trainerGender: boolean
-  constructor(arg: ArrayBuffer | AllPKMFields) {
+  constructor(arg: ArrayBuffer | AllPKMFields, encrypted?: boolean) {
     if (arg instanceof ArrayBuffer) {
-      const buffer = arg
+      let buffer = arg
+      if (encrypted) {
+        const unencryptedBytes = encryption.decryptByteArrayGen89(buffer)
+        const unshuffledBytes = encryption.unshuffleBlocksGen89(unencryptedBytes)
+        buffer = unshuffledBytes
+      }
       const dataView = new DataView(buffer)
       this.encryptionConstant = dataView.getUint32(0x0, true)
       this.checksum = dataView.getUint16(0x6, true)
@@ -114,7 +119,7 @@ export class PK9 {
       this.nature = dataView.getUint8(0x20)
       this.statNature = dataView.getUint8(0x21)
       this.isFatefulEncounter = byteLogic.getFlag(dataView, 0x22, 0)
-      this.gender = dataView.getUint8(0x22)
+      this.gender = byteLogic.uIntFromBufferBits(dataView, 0x22, 1, 2, true)
       this.formeNum = dataView.getUint16(0x24, true)
       this.evs = types.readStatsFromBytesU8(dataView, 0x26)
       this.contest = types.readContestStatsFromBytes(dataView, 0x2c)
@@ -289,11 +294,7 @@ export class PK9 {
         feeling: 0,
         textVariables: 0,
       }
-      this.eggDate = other.eggDate ?? {
-        month: new Date().getMonth(),
-        day: new Date().getDate(),
-        year: new Date().getFullYear(),
-      }
+      this.eggDate = other.eggDate ?? undefined
       this.metDate = other.metDate ?? {
         month: new Date().getMonth(),
         day: new Date().getDate(),
@@ -347,7 +348,7 @@ export class PK9 {
     dataView.setUint8(0x20, this.nature)
     dataView.setUint8(0x21, this.statNature)
     byteLogic.setFlag(dataView, 0x22, 0, this.isFatefulEncounter)
-    dataView.setUint8(0x22, this.gender)
+    byteLogic.uIntToBufferBits(dataView, this.gender, 34, 1, 2, true)
     dataView.setUint16(0x24, this.formeNum, true)
     types.writeStatsToBytesU8(dataView, 0x26, this.evs)
     types.writeContestStatsToBytes(dataView, 0x2c, this.contest)
@@ -363,12 +364,15 @@ export class PK9 {
     for (let i = 0; i < 4; i++) {
       dataView.setUint16(0x72 + i * 2, this.moves[i], true)
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint8(0x7a + i, this.movePP[i])
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint8(0x7e + i, this.movePPUps[i])
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint16(0x82 + i * 2, this.relearnMoves[i], true)
     }
@@ -441,6 +445,19 @@ export class PK9 {
 
   public get natureName() {
     return NatureToString(this.nature)
+  }
+
+  public calcChecksum() {
+    return encryption.get16BitChecksumLittleEndian(this.toBytes(), 0x08, 0x148)
+  }
+
+  public refreshChecksum() {
+    this.checksum = encryption.get16BitChecksumLittleEndian(this.toBytes(), 0x08, 0x148)
+  }
+
+  public toPCBytes() {
+    const shuffledBytes = encryption.shuffleBlocksGen89(this.toBytes())
+    return encryption.decryptByteArrayGen89(shuffledBytes)
   }
 
   public getLevel() {

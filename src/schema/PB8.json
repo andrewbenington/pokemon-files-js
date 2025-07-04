@@ -119,7 +119,9 @@
       "name": "gender",
       "type": "number",
       "byteOffset": 34,
-      "numBytes": 1
+      "numBytes": 1,
+      "numBits": 2,
+      "bitOffset": 2
     },
     {
       "name": "formeNum",
@@ -386,7 +388,8 @@
       "type": "number",
       "numBytes": 2,
       "endian": "Little",
-      "byteOffset": 288
+      "byteOffset": 288,
+      "default": "0xffff"
     },
     {
       "name": "metLocationIndex",
@@ -468,6 +471,18 @@
       "type": "boolean",
       "byteOffset": 293,
       "bitOffset": 7
+    },
+    {
+      "name": "level",
+      "type": "number",
+      "byteOffset": 328,
+      "numBytes": 1
+    },
+    {
+      "name": "stats",
+      "type": "stats",
+      "byteOffset": 330,
+      "numBytes": 12
     }
   ],
   "stringEncoding": "UTF-16",
@@ -476,5 +491,7 @@
   "maxValidMove": 826,
   "maxRibbon": "Twinkling Star",
   "maxBall": 27,
+  "checksumStart": 8,
+  "checksumEnd": 328,
   "defaultBall": "Strange"
 }

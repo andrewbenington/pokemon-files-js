@@ -92,6 +92,7 @@ export const unshuffleBlocks = (
     startIndex + blockOrder[3] * blockSize,
     startIndex + (blockOrder[3] + 1) * blockSize
   )
+
   unshuffledBytes.set(growthBlock, startIndex)
   unshuffledBytes.set(attackBlock, startIndex + blockSize)
   unshuffledBytes.set(statsBlock, startIndex + 2 * blockSize)
@@ -123,6 +124,7 @@ export const shuffleBlocks = (
     startIndex + blockOrder[3] * blockSize,
     startIndex + (blockOrder[3] + 1) * blockSize
   )
+
   unshuffledBytes.set(firstBlock, startIndex)
   unshuffledBytes.set(secondBlock, startIndex + blockSize)
   unshuffledBytes.set(thirdBlock, startIndex + 2 * blockSize)
@@ -133,12 +135,14 @@ export const shuffleBlocks = (
 export const shuffleBlocksGen3 = (bytes: ArrayBuffer) => {
   const personalityValue = new DataView(bytes).getUint32(0x00, true)
   const shiftValue = personalityValue % 24
+
   return shuffleBlocks(bytes, shiftValue, GEN3_BLOCK_SIZE, GEN3_BLOCKS_OFFSET)
 }
 
 export const unshuffleBlocksGen3 = (bytes: ArrayBuffer) => {
   const personalityValue = new DataView(bytes).getUint32(0, true)
   const shiftValue = personalityValue % 24
+
   return unshuffleBlocks(bytes, shiftValue, GEN3_BLOCK_SIZE, GEN3_BLOCKS_OFFSET)
 }
 
@@ -146,22 +150,27 @@ export const decryptByteArrayGen3 = (bytes: ArrayBuffer) => {
   const encryptedDV = new DataView(bytes)
   const unencryptedDV = new DataView(bytes)
   const encryptionKey = encryptedDV.getUint32(0x00, true) ^ encryptedDV.getUint32(0x04, true)
+
   for (let i = GEN3_BLOCKS_OFFSET; i < GEN3_BLOCKS_OFFSET + 4 * GEN3_BLOCK_SIZE; i += 4) {
     const value = encryptedDV.getUint32(i, true) ^ encryptionKey
+
     unencryptedDV.setUint32(i, value, true)
   }
+
   return unencryptedDV.buffer
 }
 
 export const shuffleBlocksGen45 = (bytes: ArrayBuffer) => {
   const personalityValue = new DataView(bytes).getUint32(0x00, true)
   const shiftValue = ((personalityValue & 0x3e000) >> 0xd) % 24
+
   return shuffleBlocks(bytes, shiftValue, GEN45_BLOCK_SIZE, GEN456_BLOCKS_OFFSET)
 }
 
 export const unshuffleBlocksGen45 = (bytes: ArrayBuffer) => {
   const personalityValue = new DataView(bytes).getUint32(0x00, true)
   const shiftValue = ((personalityValue & 0x3e000) >> 0xd) % 24
+
   return unshuffleBlocks(bytes, shiftValue, GEN45_BLOCK_SIZE, GEN456_BLOCKS_OFFSET)
 }
 
@@ -174,58 +183,71 @@ const decryptArray = (bytes: ArrayBuffer, seed: number, start: number, end: numb
   const unencryptedBytes = new Uint8Array(bytes)
   const dataView = new DataView(bytes)
   const newDataView = new DataView(bytes)
+
   for (let i = start; i < end; i += 2) {
     const bigIntSeed = BigInt(0x41c64e6d) * BigInt(seed) + BigInt(0x6073)
+
     seed = Number(bigIntSeed & BigInt(0xffffffff))
     const xorValue = (seed >> 16) & 0xffff
     const unencryptedWord = dataView.getUint16(i, true) ^ xorValue
+
     newDataView.setUint16(i, unencryptedWord, true)
   }
+
   return unencryptedBytes.buffer
 }
 
 export const decryptByteArrayGen45 = (bytes: ArrayBuffer) => {
   const checksum = new DataView(bytes).getUint16(0x06, true)
+
   return decryptByteArray(bytes, checksum, GEN45_BLOCK_SIZE)
 }
 
 export const shuffleBlocksGen67 = (bytes: ArrayBuffer) => {
   const encryptionConstant = new DataView(bytes).getUint32(0x00, true)
   const shiftValue = ((encryptionConstant & 0x3e000) >> 0xd) % 24
+
   return shuffleBlocks(bytes, shiftValue, GEN67_BLOCK_SIZE, GEN456_BLOCKS_OFFSET)
 }
 
 export const unshuffleBlocksGen67 = (bytes: ArrayBuffer) => {
   const encryptionConstant = new DataView(bytes).getUint32(0x00, true)
   const shiftValue = ((encryptionConstant & 0x3e000) >> 0xd) % 24
+
   return unshuffleBlocks(bytes, shiftValue, GEN67_BLOCK_SIZE, GEN456_BLOCKS_OFFSET)
 }
 
-export const shuffleBlocksGen8 = (bytes: ArrayBuffer) => {
+export const shuffleBlocksGen89 = (bytes: ArrayBuffer) => {
   const encryptionConstant = new DataView(bytes).getUint32(0x00, true)
   const shiftValue = ((encryptionConstant & 0x3e000) >> 0xd) % 24
+
   return shuffleBlocks(bytes, shiftValue, GEN8_BLOCK_SIZE, GEN456_BLOCKS_OFFSET)
 }
 
-export const unshuffleBlocksGen8 = (bytes: ArrayBuffer) => {
+export const unshuffleBlocksGen89 = (bytes: ArrayBuffer) => {
   const encryptionConstant = new DataView(bytes).getUint32(0x00, true)
   const shiftValue = ((encryptionConstant & 0x3e000) >> 0xd) % 24
+
   return unshuffleBlocks(bytes, shiftValue, GEN8_BLOCK_SIZE, GEN456_BLOCKS_OFFSET)
 }
+
 export const shuffleBlocksGen8A = (bytes: ArrayBuffer) => {
   const encryptionConstant = new DataView(bytes).getUint32(0x00, true)
   const shiftValue = ((encryptionConstant & 0x3e000) >> 0xd) % 24
+
   return shuffleBlocks(bytes, shiftValue, GEN8A_BLOCK_SIZE, GEN456_BLOCKS_OFFSET)
 }
 
 export const unshuffleBlocksGen8A = (bytes: ArrayBuffer) => {
   const encryptionConstant = new DataView(bytes).getUint32(0x00, true)
   const shiftValue = ((encryptionConstant & 0x3e000) >> 0xd) % 24
+
   return unshuffleBlocks(bytes, shiftValue, GEN8A_BLOCK_SIZE, GEN456_BLOCKS_OFFSET)
 }
 
 export const decryptByteArrayGen67 = (bytes: ArrayBuffer) => {
   const encryptionConstant = new DataView(bytes).getUint32(0x00, true)
+
   return decryptByteArray(bytes, encryptionConstant, GEN67_BLOCK_SIZE)
 }
 
@@ -245,6 +267,7 @@ function joinBuffers(buffers: ArrayBuffer[]): ArrayBuffer {
   const size = buffers.reduce((p, n) => (p += n.byteLength), 0)
   const array = new Uint8Array(size)
   let offset = 0
+
   buffers.forEach((buffer) => {
     array.set(new Uint8Array(buffer), offset)
     offset += buffer.byteLength
@@ -253,7 +276,7 @@ function joinBuffers(buffers: ArrayBuffer[]): ArrayBuffer {
   return array.buffer
 }
 
-export const decryptByteArrayGen8 = (bytes: ArrayBuffer) => {
+export const decryptByteArrayGen89 = (bytes: ArrayBuffer) => {
   return cryptPKM(bytes, GEN8_ENCRYPTED_SIZE)
 }
 
@@ -264,9 +287,11 @@ export const decryptByteArrayGen8A = (bytes: ArrayBuffer) => {
 export const get16BitChecksumLittleEndian = (bytes: ArrayBuffer, start: number, end: number) => {
   let checksum = 0
   const dataView = new DataView(bytes)
+
   for (let i = start; i < end; i += 2) {
     checksum = (checksum + dataView.getUint16(i, true)) & 0xffff
   }
+
   return checksum
 }
 

@@ -119,7 +119,9 @@
       "name": "gender",
       "type": "number",
       "byteOffset": 34,
-      "numBytes": 1
+      "numBytes": 1,
+      "numBits": 2,
+      "bitOffset": 2
     },
     {
       "name": "formeNum",

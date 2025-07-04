@@ -18,6 +18,7 @@ function fileTypeFromBuffer(buffer: ArrayBuffer): string | undefined {
       ) {
         return 'PK5'
       }
+
       return 'PK4'
     case 236:
       return 'PK4'
@@ -67,6 +68,7 @@ export function classFromFormat(format: string) {
 
 export const bytesToPKMInterface = (bytes: ArrayBuffer, extension: string): PKM => {
   let format: string | undefined = extension
+
   if (format === '' || format === 'PKM') {
     format = fileTypeFromBuffer(bytes)
   }
@@ -76,8 +78,10 @@ export const bytesToPKMInterface = (bytes: ArrayBuffer, extension: string): PKM 
   }
 
   const pkmClass = classFromFormat(format)
+
   if (!pkmClass) {
     throw `Unrecognized file`
   }
+
   return new pkmClass(bytes)
 }
