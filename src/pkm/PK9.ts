@@ -9,7 +9,6 @@ import {
   ModernRibbons,
   NatureToString,
 } from 'pokemon-resources'
-
 import * as conversion from '../conversion'
 import * as byteLogic from '../util/byteLogic'
 import * as encryption from '../util/encryption'
@@ -295,11 +294,7 @@ export class PK9 {
         feeling: 0,
         textVariables: 0,
       }
-      this.eggDate = other.eggDate ?? {
-        month: new Date().getMonth(),
-        day: new Date().getDate(),
-        year: new Date().getFullYear(),
-      }
+      this.eggDate = other.eggDate ?? undefined
       this.metDate = other.metDate ?? {
         month: new Date().getMonth(),
         day: new Date().getDate(),
@@ -369,12 +364,15 @@ export class PK9 {
     for (let i = 0; i < 4; i++) {
       dataView.setUint16(0x72 + i * 2, this.moves[i], true)
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint8(0x7a + i, this.movePP[i])
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint8(0x7e + i, this.movePPUps[i])
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint16(0x82 + i * 2, this.relearnMoves[i], true)
     }

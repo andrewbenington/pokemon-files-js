@@ -383,15 +383,19 @@ export const GBStringDict: { [key: number]: string } = {
  */
 export const readGameBoyStringFromBytes = (dataView: DataView, offset: number, length: number) => {
   let str = ''
+
   // console.log(bytes);
   for (let i = offset; i < offset + length; i += 1) {
     // console.log(i, bytes[i], GBStringDict[bytes[i]]);
     const character = dataView.getUint8(i)
+
     if (character === G1_TERMINATOR) {
       break
     }
+
     str += GBStringDict[character] ?? '?'
   }
+
   return str
 }
 
@@ -414,6 +418,7 @@ export const writeGameBoyStringToBytes = (
   for (let i = 0; i < Math.min(str.length, length); i++) {
     const character = str.charAt(i)
     const dictEntry = Object.entries(GBStringDict).find(([, val]) => val === character)
+
     if (str.charCodeAt(i) === 0) {
       break
     } else if (!dictEntry) {
@@ -422,8 +427,10 @@ export const writeGameBoyStringToBytes = (
       dataView.setUint8(offset + i, parseInt(dictEntry[0]))
     }
   }
+
   if (terminate) {
     const terminalIndex = Math.min(str.length, length - 1)
+
     dataView.setUint8(offset + terminalIndex, G1_TERMINATOR)
   }
 }
@@ -438,17 +445,21 @@ export const writeGameBoyStringToBytes = (
  */
 export const readGen3StringFromBytes = (dataView: DataView, offset: number, length: number) => {
   let str = ''
+
   for (let i = offset; i < offset + length; i += 1) {
     const byte = dataView.getUint8(i)
+
     if (byte === 0xff) {
       return str
     }
+
     if (byte in Gen3CharacterSet) {
       str += Gen3CharacterSet[byte]
     } else {
       str += '?'
     }
   }
+
   return str
 }
 
@@ -470,8 +481,10 @@ export const writeGen3StringToBytes = (
   terminateFill: boolean
 ) => {
   let i = 0
+
   for (; i < Math.min(str.length, length); i++) {
     const gen3Char = Gen3CharacterSet.indexOf(str.charAt(i))
+
     if (str.charCodeAt(offset + i) === 0) {
       break
     } else if (gen3Char === -1) {
@@ -481,11 +494,14 @@ export const writeGen3StringToBytes = (
       dataView.setUint8(offset + i, gen3Char)
     }
   }
+
   const terminatorStart = i
+
   if (terminatorStart === length) {
     // no room for terminator
     return
   }
+
   if (terminateFill) {
     new Uint8Array(dataView.buffer).set(
       new Uint8Array(length - terminatorStart).fill(0xff),
@@ -494,6 +510,7 @@ export const writeGen3StringToBytes = (
   } else {
     dataView.setUint8(offset + terminatorStart, 0xff)
   }
+
   return
 }
 
@@ -507,13 +524,17 @@ export const writeGen3StringToBytes = (
  */
 export const readGen4StringFromBytes = (dataView: DataView, offset: number, length: number) => {
   let str = ''
+
   for (let i = 0; i < length; i += 1) {
     const value = dataView.getUint16(offset + 2 * i, true)
+
     if (value === 0xffff) {
       return str
     }
+
     str += String.fromCharCode(Gen4ToUTFMap[value])
   }
+
   return str
 }
 
@@ -534,6 +555,7 @@ export const writeGen4StringToBytes = (
   for (let i = 0; i < Math.min(str.length, length); i++) {
     const val = str.charCodeAt(i)
     const gen4Char = UTFToGen4Map[val]
+
     if (gen4Char === -1) {
       // unsupported characters are now '?'
       dataView.setUint16(offset + i * 2, 0x01ac, true)
@@ -541,6 +563,7 @@ export const writeGen4StringToBytes = (
       dataView.setUint16(offset + i * 2, gen4Char, true)
     }
   }
+
   if (str.length < length) {
     dataView.setUint16(offset + str.length * 2, 0xffff, true)
   }
@@ -556,13 +579,17 @@ export const writeGen4StringToBytes = (
  */
 export const readGen5StringFromBytes = (dataView: DataView, offset: number, length: number) => {
   let str = ''
+
   for (let i = 0; i < length; i += 1) {
     const value = dataView.getUint16(offset + 2 * i, true)
+
     if (value === 0xffff) {
       return str
     }
+
     str += String.fromCharCode(value)
   }
+
   return str
 }
 
@@ -582,11 +609,14 @@ export const writeGen5StringToBytes = (
 ) => {
   for (let i = 0; i < Math.min(str.length, length); i++) {
     const val = str.charCodeAt(i)
+
     if (val === 0 || i >= str.length) {
       break
     }
+
     dataView.setUint16(offset + i * 2, val, true)
   }
+
   if (str.length < length) {
     dataView.setUint16(offset + str.length * 2, 0xffff, true)
   }
@@ -607,18 +637,25 @@ export const utf16BytesToString = (
 ) => {
   const byteArray = new Uint16Array(length)
   const dataView = new DataView(bytes)
+
   for (let i = 0; i < length; i += 1) {
     const value = dataView.getUint16(offset + 2 * i, littleEndian)
+
     if (value === 0) {
       break
     }
+
     byteArray[i] = value
   }
+
   let stringLength = byteArray.indexOf(0)
+
   if (stringLength < 0) {
     stringLength = length
   }
+
   const str = new TextDecoder('utf-16').decode(byteArray.slice(0, stringLength))
+
   return str
 }
 
@@ -637,6 +674,7 @@ export const writeUTF16StringToBytes = (
 ) => {
   for (let i = 0; i < Math.min(str.length, length); i++) {
     const val = str.charCodeAt(i)
+
     dataView.setUint16(offset + i * 2, val, !bigEndian)
   }
 }

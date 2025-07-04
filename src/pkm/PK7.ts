@@ -9,7 +9,6 @@ import {
   ModernRibbons,
   NatureToString,
 } from 'pokemon-resources'
-
 import * as byteLogic from '../util/byteLogic'
 import * as encryption from '../util/encryption'
 import { AllPKMFields } from '../util/pkmInterface'
@@ -191,6 +190,7 @@ export class PK7 {
       } else {
         this.statusCondition = 0
       }
+
       if (dataView.byteLength >= 260) {
         this.currentHP = dataView.getUint8(0xf0)
       } else {
@@ -304,11 +304,7 @@ export class PK7 {
       this.trainerName = other.trainerName
       this.trainerFriendship = other.trainerFriendship ?? 0
       this.trainerAffection = other.trainerAffection ?? 0
-      this.eggDate = other.eggDate ?? {
-        month: new Date().getMonth(),
-        day: new Date().getDate(),
-        year: new Date().getFullYear(),
-      }
+      this.eggDate = other.eggDate ?? undefined
       this.metDate = other.metDate ?? {
         month: new Date().getMonth(),
         day: new Date().getDate(),
@@ -392,12 +388,15 @@ export class PK7 {
     for (let i = 0; i < 4; i++) {
       dataView.setUint16(0x5a + i * 2, this.moves[i], true)
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint8(0x62 + i, this.movePP[i])
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint8(0x66 + i, this.movePPUps[i])
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint16(0x6a + i * 2, this.relearnMoves[i], true)
     }
@@ -434,6 +433,7 @@ export class PK7 {
     if (options?.includeExtraFields) {
       dataView.setUint8(0xe8, this.statusCondition)
     }
+
     if (options?.includeExtraFields) {
       dataView.setUint8(0xf0, this.currentHP)
     }

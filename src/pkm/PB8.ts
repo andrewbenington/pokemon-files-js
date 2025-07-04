@@ -9,7 +9,6 @@ import {
   ModernRibbons,
   NatureToString,
 } from 'pokemon-resources'
-
 import * as byteLogic from '../util/byteLogic'
 import * as encryption from '../util/encryption'
 import { AllPKMFields } from '../util/pkmInterface'
@@ -85,7 +84,7 @@ export class PB8 {
   trainerFriendship: number
   eggDate: types.PKMDate | undefined
   metDate: types.PKMDate | undefined
-  eggLocationIndex: number
+  eggLocationIndexInternal: number = 0xffff
   metLocationIndex: number
   ball: number
   metLevel: number
@@ -125,7 +124,7 @@ export class PB8 {
       this.nature = dataView.getUint8(0x20)
       this.statNature = dataView.getUint8(0x21)
       this.isFatefulEncounter = byteLogic.getFlag(dataView, 0x22, 0)
-      this.gender = byteLogic.uIntFromBufferBits(dataView, 0x22, 1, 2, true)
+      this.gender = byteLogic.uIntFromBufferBits(dataView, 0x22, 2, 2, true)
       this.formeNum = dataView.getUint16(0x24, true)
       this.evs = types.readStatsFromBytesU8(dataView, 0x26)
       this.contest = types.readContestStatsFromBytes(dataView, 0x2c)
@@ -186,7 +185,7 @@ export class PB8 {
       this.trainerFriendship = dataView.getUint8(0x112)
       this.eggDate = types.pkmDateFromBytes(dataView, 0x119)
       this.metDate = types.pkmDateFromBytes(dataView, 0x11c)
-      this.eggLocationIndex = dataView.getUint16(0x120, true)
+      this.eggLocationIndexInternal = dataView.getUint16(0x120, true)
       this.metLocationIndex = dataView.getUint16(0x122, true)
       this.ball = dataView.getUint8(0x124)
       this.metLevel = byteLogic.uIntFromBufferBits(dataView, 0x125, 0, 7, true)
@@ -295,18 +294,15 @@ export class PB8 {
       this.affixedRibbon = other.affixedRibbon ?? undefined
       this.trainerName = other.trainerName
       this.trainerFriendship = other.trainerFriendship ?? 0
-      this.eggDate = other.eggDate ?? {
-        month: new Date().getMonth(),
-        day: new Date().getDate(),
-        year: new Date().getFullYear(),
-      }
+      this.eggDate = other.eggDate ?? undefined
       this.metDate = other.metDate ?? {
         month: new Date().getMonth(),
         day: new Date().getDate(),
         year: new Date().getFullYear(),
       }
-      this.eggLocationIndex = other.eggLocationIndex ?? 0xffff
+      this.eggLocationIndex = other.eggLocationIndex ?? 0
       this.metLocationIndex = other.metLocationIndex ?? 0
+
       if (other.ball && PB8.maxValidBall() >= other.ball) {
         this.ball = other.ball
       } else {
@@ -375,7 +371,7 @@ export class PB8 {
     dataView.setUint8(0x20, this.nature)
     dataView.setUint8(0x21, this.statNature)
     byteLogic.setFlag(dataView, 0x22, 0, this.isFatefulEncounter)
-    byteLogic.uIntToBufferBits(dataView, this.gender, 34, 1, 2, true)
+    byteLogic.uIntToBufferBits(dataView, this.gender, 34, 2, 2, true)
     dataView.setUint16(0x24, this.formeNum, true)
     types.writeStatsToBytesU8(dataView, 0x26, this.evs)
     types.writeContestStatsToBytes(dataView, 0x2c, this.contest)
@@ -390,12 +386,15 @@ export class PB8 {
     for (let i = 0; i < 4; i++) {
       dataView.setUint16(0x72 + i * 2, this.moves[i], true)
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint8(0x7a + i, this.movePP[i])
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint8(0x7e + i, this.movePPUps[i])
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint16(0x82 + i * 2, this.relearnMoves[i], true)
     }
@@ -424,7 +423,7 @@ export class PB8 {
     dataView.setUint8(0x112, this.trainerFriendship)
     types.writePKMDateToBytes(dataView, 0x119, this.eggDate)
     types.writePKMDateToBytes(dataView, 0x11c, this.metDate)
-    dataView.setUint16(0x120, this.eggLocationIndex, true)
+    dataView.setUint16(0x120, this.eggLocationIndexInternal, true)
     dataView.setUint16(0x122, this.metLocationIndex, true)
     dataView.setUint8(0x124, this.ball)
     byteLogic.uIntToBufferBits(dataView, this.metLevel, 293, 0, 7, true)
@@ -473,6 +472,14 @@ export class PB8 {
 
   public get natureName() {
     return NatureToString(this.nature)
+  }
+
+  public get eggLocationIndex() {
+    return this.eggLocationIndexInternal === 0xffff ? 0 : this.eggLocationIndexInternal
+  }
+
+  public set eggLocationIndex(value: number) {
+    this.eggLocationIndexInternal = value === 0 ? 0xffff : value
   }
 
   public calcChecksum() {

@@ -70,12 +70,16 @@ export class PK3 {
   constructor(arg: ArrayBuffer | AllPKMFields, encrypted?: boolean) {
     if (arg instanceof ArrayBuffer) {
       let buffer = arg
+
       if (encrypted) {
         const unencryptedBytes = encryption.decryptByteArrayGen3(buffer)
         const unshuffledBytes = encryption.unshuffleBlocksGen3(unencryptedBytes)
+
         buffer = unshuffledBytes
       }
+
       const dataView = new DataView(buffer)
+
       this.personalityValue = dataView.getUint32(0x0, true)
       this.trainerID = dataView.getUint16(0x4, true)
       this.secretID = dataView.getUint16(0x6, true)
@@ -120,11 +124,13 @@ export class PK3 {
       } else {
         this.statusCondition = 0
       }
+
       if (dataView.byteLength >= 100) {
         this.currentHP = dataView.getUint8(0x56)
       } else {
         this.currentHP = 0
       }
+
       this.nickname = stringLogic.readGen3StringFromBytes(dataView, 0x8, 10)
       this.trainerName = stringLogic.readGen3StringFromBytes(dataView, 0x14, 7)
       this.ribbons = gen3ContestRibbonsFromBuffer(dataView, 0x4c, 0).concat(
@@ -134,6 +140,7 @@ export class PK3 {
       this.checksum = dataView.getUint16(0x1c, true)
     } else {
       const other = arg
+
       this.personalityValue = generatePersonalityValuePreservingAttributes(other) ?? 0
       this.trainerID = other.trainerID
       this.secretID = other.secretID
@@ -178,6 +185,7 @@ export class PK3 {
       } else {
         this.ball = Ball.Poke
       }
+
       this.ivs = other.ivs ?? {
         hp: 0,
         atk: 0,
@@ -220,13 +228,16 @@ export class PK3 {
     for (let i = 0; i < 4; i++) {
       byteLogic.uIntToBufferBits(dataView, this.movePPUps[i], 0x28, 0 + i * 2, 2, true)
     }
+
     dataView.setUint8(0x29, this.trainerFriendship)
     for (let i = 0; i < 4; i++) {
       dataView.setUint16(0x2c + i * 2, this.moves[i], true)
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint8(0x34 + i, this.movePP[i])
     }
+
     types.writeStatsToBytesU8(dataView, 0x38, this.evs)
     types.writeContestStatsToBytes(dataView, 0x3e, this.contest)
     dataView.setUint8(0x44, this.pokerusByte)
@@ -242,9 +253,11 @@ export class PK3 {
     if (options?.includeExtraFields) {
       dataView.setUint8(0x50, this.statusCondition)
     }
+
     if (options?.includeExtraFields) {
       dataView.setUint8(0x56, this.currentHP)
     }
+
     stringLogic.writeGen3StringToBytes(dataView, this.nickname, 0x8, 10, false)
     stringLogic.writeGen3StringToBytes(dataView, this.trainerName, 0x14, 7, true)
     gen3ContestRibbonsToBuffer(dataView, 0x4c, 0, this.ribbons)
@@ -292,9 +305,11 @@ export class PK3 {
   public get ability() {
     const ability1 = PokemonData[this.dexNum]?.formes[0].ability1
     const ability2 = PokemonData[this.dexNum]?.formes[0].ability2
+
     if (this.abilityNum === 2 && ability2 && AbilityFromString(ability2) <= 77) {
       return ability2
     }
+
     return ability1
   }
 
@@ -305,11 +320,13 @@ export class PK3 {
   public get formeNum() {
     if (this.dexNum === NationalDex.Unown) {
       let letterValue = (this.personalityValue >> 24) & 0x3
+
       letterValue = ((this.personalityValue >> 16) & 0x3) | (letterValue << 2)
       letterValue = ((this.personalityValue >> 8) & 0x3) | (letterValue << 2)
       letterValue = (this.personalityValue & 0x3) | (letterValue << 2)
       return letterValue % 28
     }
+
     return 0
   }
 
@@ -323,6 +340,7 @@ export class PK3 {
 
   public toPCBytes() {
     const shuffledBytes = encryption.shuffleBlocksGen3(this.toBytes())
+
     return encryption.decryptByteArrayGen3(shuffledBytes)
   }
 

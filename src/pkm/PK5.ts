@@ -74,12 +74,16 @@ export class PK5 {
   constructor(arg: ArrayBuffer | AllPKMFields, encrypted?: boolean) {
     if (arg instanceof ArrayBuffer) {
       let buffer = arg
+
       if (encrypted) {
         const unencryptedBytes = encryption.decryptByteArrayGen45(buffer)
         const unshuffledBytes = encryption.unshuffleBlocksGen45(unencryptedBytes)
+
         buffer = unshuffledBytes
       }
+
       const dataView = new DataView(buffer)
+
       this.personalityValue = dataView.getUint32(0x0, true)
       this.dexNum = dataView.getUint16(0x8, true)
       this.heldItemIndex = dataView.getUint16(0xa, true)
@@ -133,11 +137,13 @@ export class PK5 {
       } else {
         this.statusCondition = 0
       }
+
       if (dataView.byteLength >= 236) {
         this.currentHP = dataView.getUint8(0x8e)
       } else {
         this.currentHP = 0
       }
+
       this.ribbons = byteLogic
         .getFlagIndexes(dataView, 0x24, 0, 28)
         .map((index) => Gen4Ribbons[index])
@@ -154,6 +160,7 @@ export class PK5 {
       this.checksum = dataView.getUint16(0x6, true)
     } else {
       const other = arg
+
       this.personalityValue = this.personalityValue =
         generatePersonalityValuePreservingAttributes(other) ?? 0
       this.dexNum = other.dexNum
@@ -227,6 +234,7 @@ export class PK5 {
       } else {
         this.ball = Ball.Poke
       }
+
       this.metLevel = other.metLevel ?? 0
       this.encounterType = other.encounterType ?? 0
       this.pokeStarFame = other.pokeStarFame ?? 0
@@ -264,12 +272,15 @@ export class PK5 {
     for (let i = 0; i < 4; i++) {
       dataView.setUint16(0x28 + i * 2, this.moves[i], true)
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint8(0x30 + i, this.movePP[i])
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint8(0x34 + i, this.movePPUps[i])
     }
+
     types.write30BitIVsToBytes(dataView, 0x38, this.ivs)
     byteLogic.setFlag(dataView, 0x38, 30, this.isEgg)
     byteLogic.setFlag(dataView, 0x38, 31, this.isNicknamed)
@@ -291,9 +302,11 @@ export class PK5 {
     if (options?.includeExtraFields) {
       dataView.setUint8(0x88, this.statusCondition)
     }
+
     if (options?.includeExtraFields) {
       dataView.setUint8(0x8e, this.currentHP)
     }
+
     byteLogic.setFlagIndexes(
       dataView,
       0x24,
@@ -359,6 +372,7 @@ export class PK5 {
 
   public toPCBytes() {
     const shuffledBytes = encryption.shuffleBlocksGen45(this.toBytes())
+
     return encryption.decryptByteArrayGen45(shuffledBytes)
   }
 

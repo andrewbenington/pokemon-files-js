@@ -350,8 +350,10 @@ func defaultValueByType(t string) string {
 		return "undefined"
 	case "boolean":
 		return "false"
-	case "pokedate", "pokedate | undefined":
+	case "pokedate":
 		return defaultPokeDate
+	case "pokedate | undefined":
+		return "undefined"
 	case "stats", "ivs30Bits":
 		return defaultStats
 	case "statsPreSplit", "dvs":

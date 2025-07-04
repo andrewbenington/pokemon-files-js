@@ -27,15 +27,18 @@
   },
   "homepage": "https://github.com/andrewbenington/pokemon-files-js#readme",
   "dependencies": {
-    "pokemon-resources": "^1.0.11",
+    "pokemon-resources": "file:../pokemon-resources",
     "pokemon-species-data": "^0.4.4",
     "prando": "^6.0.1"
   },
   "devDependencies": {
     "@jest/globals": "^30.0.3",
+    "@stylistic/eslint-plugin": "^5.0.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.0.4",
     "@typescript-eslint/eslint-plugin": "^8.15.0",
+    "@typescript-eslint/parser": "^8.35.0",
+    "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-eslint-comments": "^3.2.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-prettier": "^5.2.1",

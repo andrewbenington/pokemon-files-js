@@ -9,7 +9,6 @@ import {
   ModernRibbons,
   NatureToString,
 } from 'pokemon-resources'
-
 import * as byteLogic from '../util/byteLogic'
 import * as encryption from '../util/encryption'
 import { AllPKMFields } from '../util/pkmInterface'
@@ -131,7 +130,7 @@ export class PA8 {
       this.statNature = dataView.getUint8(0x21)
       this.isFatefulEncounter = byteLogic.getFlag(dataView, 0x22, 0)
       this.flag2LA = byteLogic.getFlag(dataView, 0x22, 1)
-      this.gender = byteLogic.uIntFromBufferBits(dataView, 0x22, 1, 2, true)
+      this.gender = byteLogic.uIntFromBufferBits(dataView, 0x22, 2, 2, true)
       this.formeNum = dataView.getUint16(0x24, true)
       this.evs = types.readStatsFromBytesU8(dataView, 0x26)
       this.contest = types.readContestStatsFromBytes(dataView, 0x2c)
@@ -320,11 +319,7 @@ export class PA8 {
       this.affixedRibbon = other.affixedRibbon ?? undefined
       this.trainerName = other.trainerName
       this.trainerFriendship = other.trainerFriendship ?? 0
-      this.eggDate = other.eggDate ?? {
-        month: new Date().getMonth(),
-        day: new Date().getDate(),
-        year: new Date().getFullYear(),
-      }
+      this.eggDate = other.eggDate ?? undefined
       this.metDate = other.metDate ?? {
         month: new Date().getMonth(),
         day: new Date().getDate(),
@@ -385,7 +380,7 @@ export class PA8 {
     dataView.setUint8(0x21, this.statNature)
     byteLogic.setFlag(dataView, 0x22, 0, this.isFatefulEncounter)
     byteLogic.setFlag(dataView, 0x22, 1, this.flag2LA)
-    byteLogic.uIntToBufferBits(dataView, this.gender, 34, 1, 2, true)
+    byteLogic.uIntToBufferBits(dataView, this.gender, 34, 2, 2, true)
     dataView.setUint16(0x24, this.formeNum, true)
     types.writeStatsToBytesU8(dataView, 0x26, this.evs)
     types.writeContestStatsToBytes(dataView, 0x2c, this.contest)
@@ -401,6 +396,7 @@ export class PA8 {
     for (let i = 0; i < 4; i++) {
       dataView.setUint16(0x54 + i * 2, this.moves[i], true)
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint8(0x5c + i, this.movePP[i])
     }
@@ -408,6 +404,7 @@ export class PA8 {
     for (let i = 0; i < 4; i++) {
       dataView.setUint8(0x86 + i, this.movePPUps[i])
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint16(0x8a + i * 2, this.relearnMoves[i], true)
     }

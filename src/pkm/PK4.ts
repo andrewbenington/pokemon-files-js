@@ -81,12 +81,16 @@ export class PK4 {
   constructor(arg: ArrayBuffer | AllPKMFields, encrypted?: boolean) {
     if (arg instanceof ArrayBuffer) {
       let buffer = arg
+
       if (encrypted) {
         const unencryptedBytes = encryption.decryptByteArrayGen45(buffer)
         const unshuffledBytes = encryption.unshuffleBlocksGen45(unencryptedBytes)
+
         buffer = unshuffledBytes
       }
+
       const dataView = new DataView(buffer)
+
       this.personalityValue = dataView.getUint32(0x0, true)
       this.dexNum = dataView.getUint16(0x8, true)
       this.heldItemIndex = dataView.getUint16(0xa, true)
@@ -138,6 +142,7 @@ export class PK4 {
       } else {
         this.statusCondition = 0
       }
+
       if (dataView.byteLength >= 236) {
         this.currentHP = dataView.getUint8(0x8e)
       } else {
@@ -176,6 +181,7 @@ export class PK4 {
       this.checksum = dataView.getUint16(0x6, true)
     } else {
       const other = arg
+
       this.personalityValue = generatePersonalityValuePreservingAttributes(other) ?? 0
       this.dexNum = other.dexNum
       this.heldItemIndex = ItemFromString(other.heldItemName)
@@ -294,7 +300,7 @@ export class PK4 {
     }
   }
 
-  static fromBytes(buffer: ArrayBufferLike): PK4 {
+  static fromBytes(buffer: ArrayBuffer): PK4 {
     return new PK4(buffer)
   }
 
@@ -317,12 +323,15 @@ export class PK4 {
     for (let i = 0; i < 4; i++) {
       dataView.setUint16(0x28 + i * 2, this.moves[i], true)
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint8(0x30 + i, this.movePP[i])
     }
+
     for (let i = 0; i < 4; i++) {
       dataView.setUint8(0x34 + i, this.movePPUps[i])
     }
+
     types.write30BitIVsToBytes(dataView, 0x38, this.ivs)
     byteLogic.setFlag(dataView, 0x38, 30, this.isEgg)
     byteLogic.setFlag(dataView, 0x38, 31, this.isNicknamed)
@@ -341,9 +350,11 @@ export class PK4 {
     if (options?.includeExtraFields) {
       dataView.setUint8(0x88, this.statusCondition)
     }
+
     if (options?.includeExtraFields) {
       dataView.setUint8(0x8e, this.currentHP)
     }
+
     dataView.setUint16(0x7e, this.eggLocationIndexDP, true)
     dataView.setUint16(0x80, this.metLocationIndexDP, true)
     dataView.setUint16(0x44, this.eggLocationIndexPtHGSS, true)
@@ -416,6 +427,7 @@ export class PK4 {
 
   public toPCBytes() {
     const shuffledBytes = encryption.shuffleBlocksGen45(this.toBytes())
+
     return encryption.decryptByteArrayGen45(shuffledBytes)
   }
   public getLevel() {

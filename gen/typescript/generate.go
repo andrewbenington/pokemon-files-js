@@ -13,7 +13,7 @@ func Generate(formats []string) {
 	for _, format := range formats {
 		// TODO: make sure these use generatePersonalityValue... and
 		// make them generated again
-		if format == "PK5" || format == "PK4" || format == "PK3" {
+		if format == "PK5" || format == "PK4" || format == "PK3" || format == "PB8" {
 			continue
 		}
 		generateFormatClass(format, universalFields)

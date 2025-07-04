@@ -109,6 +109,7 @@ export function writeStatsToBytesU16(dataView: DataView, offset: number, value: 
 
 export function read30BitIVsFromBytes(dataView: DataView, offset: number): Stats {
   const ivBytes = uIntFromBufferBits(dataView, offset, 0, 30)
+
   return {
     hp: ivBytes & 0x1f,
     atk: (ivBytes >> 5) & 0x1f,
@@ -146,6 +147,7 @@ export function readHyperTrainStatsFromBytes(dataView: DataView, offset: number)
 export const write30BitIVsToBytes = (dataView: DataView, offset: number, value: Stats) => {
   // preserve highest two bits
   let ivsValue = 0
+
   ivsValue |= (value.spd & 0x1f) << 25
   ivsValue |= (value.spa & 0x1f) << 20
   ivsValue |= (value.spe & 0x1f) << 15
@@ -296,6 +298,7 @@ export function markingsFourShapesFromOther(other?: Markings): MarkingsFourShape
       heart: false,
     }
   }
+
   return {
     circle: !!other.circle,
     triangle: !!other.triangle,
@@ -315,6 +318,7 @@ export function markingsSixShapesNoColorFromOther(other?: Markings): MarkingsSix
       diamond: false,
     }
   }
+
   return {
     circle: !!other.circle,
     triangle: !!other.triangle,
@@ -347,6 +351,7 @@ export function markingsSixShapesWithColorFromOther(other?: Markings): MarkingsS
       diamond: null,
     }
   }
+
   const coloredMarkings: MarkingsSixShapesWithColor = {
     circle: markingColorValueFromOther(other.circle),
     triangle: markingColorValueFromOther(other.triangle),
@@ -355,10 +360,12 @@ export function markingsSixShapesWithColorFromOther(other?: Markings): MarkingsS
     star: null,
     diamond: null,
   }
+
   if ('star' in other) {
     coloredMarkings.star = markingColorValueFromOther(other.star)
     coloredMarkings.diamond = markingColorValueFromOther(other.diamond)
   }
+
   return coloredMarkings
 }
 
@@ -367,6 +374,7 @@ export function markingsSixShapesWithColorFromBytes(
   offset: number
 ): MarkingsSixShapesWithColor {
   const markingsValue = data.getUint16(offset, true)
+
   return {
     circle: twoColorMarkingFromInt(markingsValue & 3),
     triangle: twoColorMarkingFromInt((markingsValue >> 2) & 3),
@@ -392,6 +400,7 @@ export function markingsSixShapesWithColorToBytes(
 
 export function readDVsFromBytes(dataView: DataView, offset: number): StatsPreSplit {
   const dvBytes = dataView.getUint16(offset, false)
+
   return {
     spc: dvBytes & 0x0f,
     spe: (dvBytes >> 4) & 0x0f,
@@ -407,6 +416,7 @@ export function readDVsFromBytes(dataView: DataView, offset: number): StatsPreSp
 
 export function writeDVsToBytes(dvs: StatsPreSplit, buffer: DataView, offset: number) {
   let dvBytes = dvs.atk & 0x0f
+
   dvBytes = (dvBytes << 4) | (dvs.def & 0x0f)
   dvBytes = (dvBytes << 4) | (dvs.spe & 0x0f)
   dvBytes = (dvBytes << 4) | (dvs.spc & 0x0f)

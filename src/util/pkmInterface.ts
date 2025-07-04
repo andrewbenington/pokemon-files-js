@@ -142,6 +142,6 @@ export interface AllPKMFields {
   refreshChecksum?: () => void
   isShiny: () => boolean
   isSquareShiny: () => boolean
-  // eslint-disable-next-line no-unused-vars
+
   toBytes: ((options?: types.ToBytesOptions) => ArrayBuffer) | (() => ArrayBuffer)
 }

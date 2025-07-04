@@ -2,7 +2,6 @@
 
 import { isGameBoy, ItemFromString, ItemToString, Languages } from 'pokemon-resources'
 import { PokemonData } from 'pokemon-species-data'
-
 import * as conversion from '../conversion'
 import * as byteLogic from '../util/byteLogic'
 import { genderFromDVs } from '../util/genderCalc'
@@ -86,6 +85,7 @@ export class PK1 {
       } else {
         this.trainerName = 'TRAINER'
       }
+
       if (dataView.byteLength >= 66) {
         this.nickname = stringLogic.readGameBoyStringFromBytes(dataView, 0x37, 11)
       } else {
@@ -163,12 +163,15 @@ export class PK1 {
     for (let i = 0; i < 4; i++) {
       byteLogic.uIntToBufferBits(dataView, this.movePP[i], 0x1d + i, 0, 6, false)
     }
+
     for (let i = 0; i < 4; i++) {
       byteLogic.uIntToBufferBits(dataView, this.movePPUps[i], 0x1d + i, 6, 2, false)
     }
+
     if (options?.includeExtraFields) {
       stringLogic.writeGameBoyStringToBytes(dataView, this.trainerName, 0x2c, 8, true)
     }
+
     if (options?.includeExtraFields) {
       stringLogic.writeGameBoyStringToBytes(dataView, this.nickname, 0x37, 11, true)
     }
