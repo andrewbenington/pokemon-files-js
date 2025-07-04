@@ -21,6 +21,14 @@ gen-rust: # Generate Rust PKM code files
 run-rust:
 	@cd rust && cargo run
 	
+.PHONY: gen-wasm
+gen-wasm: # Generate WASM from Rust code
+	@cd rust && wasm-pack build --target web
+
+.PHONY: run-wasm
+run-wasm:
+	@cd rust/wasm_test && deno run --allow-read test.ts
+	
 .PHONY: lint
 lint: # Lint typescript files
 	@npm run lint

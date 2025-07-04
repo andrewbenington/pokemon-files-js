@@ -1,5 +1,8 @@
 use serde_wasm_bindgen::to_value;
 use wasm_bindgen::prelude::*; // For serialization to JS objects
+mod conversion;
+mod pkm;
+use pkm::{Pkm, PK6};
 
 #[wasm_bindgen]
 pub struct WasmPK6 {
@@ -32,12 +35,12 @@ impl WasmPK6 {
         self.inner.to_party_bytes().to_vec()
     }
 
-    #[wasm_bindgen(js_name = getNickname)]
-    pub fn get_nickname(&self) -> String {
+    #[wasm_bindgen(method, getter)]
+    pub fn nickname(&self) -> String {
         self.inner.nickname.clone()
     }
 
-    #[wasm_bindgen(js_name = setNickname)]
+    #[wasm_bindgen(method, setter)]
     pub fn set_nickname(&mut self, nickname: String) {
         self.inner.nickname = nickname;
     }
@@ -45,5 +48,11 @@ impl WasmPK6 {
     #[wasm_bindgen(js_name = toJson)]
     pub fn to_json(&self) -> JsValue {
         to_value(&self.inner).unwrap()
+    }
+}
+
+impl Default for WasmPK6 {
+    fn default() -> Self {
+        Self::new()
     }
 }

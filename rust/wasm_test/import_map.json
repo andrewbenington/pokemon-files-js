@@ -1,0 +1,5 @@
+{
+  "imports": {
+    "pokemon-files-rs/": "../pkg/"
+  }
+}
