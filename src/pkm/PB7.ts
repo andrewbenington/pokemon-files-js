@@ -24,6 +24,7 @@ export class PB7 {
     return 232
   }
   encryptionConstant: number
+  checksum: number
   dexNum: number
   heldItemIndex: number
   trainerID: number
@@ -42,6 +43,7 @@ export class PB7 {
   avs: types.Stats
   resortEventStatus: number
   pokerusByte: number
+  heightAbsoluteBytes: Uint8Array
   height: number
   weight: number
   formArgument: number
@@ -72,6 +74,7 @@ export class PB7 {
   hyperTraining: types.HyperTrainStats
   gameOfOrigin: number
   languageIndex: number
+  weightAbsoluteBytes: Uint8Array
   statusCondition: number
   currentHP: number
   trainerGender: boolean
@@ -80,6 +83,7 @@ export class PB7 {
       const buffer = arg
       const dataView = new DataView(buffer)
       this.encryptionConstant = dataView.getUint32(0x0, true)
+      this.checksum = dataView.getUint16(0x6, true)
       this.dexNum = dataView.getUint16(0x8, true)
       this.heldItemIndex = dataView.getUint16(0xa, true)
       this.trainerID = dataView.getUint16(0xc, true)
@@ -98,6 +102,7 @@ export class PB7 {
       this.avs = types.readStatsFromBytesU8(dataView, 0x24)
       this.resortEventStatus = dataView.getUint8(0x2a)
       this.pokerusByte = dataView.getUint8(0x2b)
+      this.heightAbsoluteBytes = new Uint8Array(buffer).slice(0x2c, 0x30)
       this.height = dataView.getUint8(0x3a)
       this.weight = dataView.getUint8(0x3b)
       this.formArgument = dataView.getUint32(0x3c, true)
@@ -148,6 +153,7 @@ export class PB7 {
       this.hyperTraining = types.readHyperTrainStatsFromBytes(dataView, 0xde)
       this.gameOfOrigin = dataView.getUint8(0xdf)
       this.languageIndex = dataView.getUint8(0xe3)
+      this.weightAbsoluteBytes = new Uint8Array(buffer).slice(0xe4, 0xe8)
       if (dataView.byteLength >= 260) {
         this.statusCondition = dataView.getUint8(0xe8)
       } else {
@@ -163,6 +169,7 @@ export class PB7 {
     } else {
       const other = arg
       this.encryptionConstant = other.encryptionConstant ?? 0
+      this.checksum = other.checksum ?? 0
       this.dexNum = other.dexNum
       this.heldItemIndex = ItemFromString(other.heldItemName)
       this.trainerID = other.trainerID
@@ -202,6 +209,7 @@ export class PB7 {
       }
       this.resortEventStatus = other.resortEventStatus ?? 0
       this.pokerusByte = other.pokerusByte ?? 0
+      this.heightAbsoluteBytes = other.heightAbsoluteBytes ?? new Uint8Array(4)
       this.height = other.height ?? 0
       this.weight = other.weight ?? 0
       this.formArgument = other.formArgument ?? 0
@@ -258,6 +266,7 @@ export class PB7 {
       }
       this.gameOfOrigin = other.gameOfOrigin
       this.languageIndex = other.languageIndex
+      this.weightAbsoluteBytes = other.weightAbsoluteBytes ?? new Uint8Array(4)
       this.statusCondition = other.statusCondition ?? 0
       this.currentHP = other.currentHP
       this.trainerGender = other.trainerGender
@@ -273,6 +282,7 @@ export class PB7 {
     const dataView = new DataView(buffer)
 
     dataView.setUint32(0x0, this.encryptionConstant, true)
+    dataView.setUint16(0x6, this.checksum, true)
     dataView.setUint16(0x8, this.dexNum, true)
     dataView.setUint16(0xa, this.heldItemIndex, true)
     dataView.setUint16(0xc, this.trainerID, true)
@@ -291,6 +301,7 @@ export class PB7 {
     types.writeStatsToBytesU8(dataView, 0x24, this.avs)
     dataView.setUint8(0x2a, this.resortEventStatus)
     dataView.setUint8(0x2b, this.pokerusByte)
+    new Uint8Array(buffer).set(new Uint8Array(this.heightAbsoluteBytes.slice(0, 4)), 0x2c)
     dataView.setUint8(0x3a, this.height)
     dataView.setUint8(0x3b, this.weight)
     dataView.setUint32(0x3c, this.formArgument, true)
@@ -332,6 +343,7 @@ export class PB7 {
     types.writeHyperTrainStatsToBytes(dataView, 0xde, this.hyperTraining)
     dataView.setUint8(0xdf, this.gameOfOrigin)
     dataView.setUint8(0xe3, this.languageIndex)
+    new Uint8Array(buffer).set(new Uint8Array(this.weightAbsoluteBytes.slice(0, 4)), 0xe4)
     if (options?.includeExtraFields) {
       dataView.setUint8(0xe8, this.statusCondition)
     }
@@ -356,6 +368,22 @@ export class PB7 {
   }
   public get heldItemName() {
     return ItemToString(this.heldItemIndex)
+  }
+
+  public get heightAbsolute() {
+    return new DataView(this.heightAbsoluteBytes.buffer).getFloat32(0, true)
+  }
+
+  public get heightDeviation() {
+    return 0.4
+  }
+
+  public get weightAbsolute() {
+    return new DataView(this.weightAbsoluteBytes.buffer).getFloat32(0, true)
+  }
+
+  public get weightDeviation() {
+    return 0.4
   }
 
   public get natureName() {

@@ -11,6 +11,13 @@
       "byteOffset": 0
     },
     {
+      "name": "checksum",
+      "type": "number",
+      "numBytes": 2,
+      "endian": "Little",
+      "byteOffset": 6
+    },
+    {
       "name": "dexNum",
       "type": "number",
       "numBytes": 2,
@@ -128,6 +135,13 @@
       "type": "number",
       "byteOffset": 43,
       "numBytes": 1
+    },
+
+    {
+      "name": "heightAbsoluteBytes",
+      "type": "Uint8Array",
+      "byteOffset": 44,
+      "numBytes": 4
     },
     {
       "name": "height",
@@ -326,6 +340,12 @@
       "numBytes": 1
     },
     {
+      "name": "weightAbsoluteBytes",
+      "type": "Uint8Array",
+      "byteOffset": 228,
+      "numBytes": 4
+    },
+    {
       "name": "statusCondition",
       "type": "number",
       "byteOffset": 232,
@@ -356,5 +376,9 @@
   "shinyThreshold": 16,
   "memoryType": "3DS",
   "maxValidMove": 742,
-  "allowedBalls": [1, 2, 3, 4, 12]
+  "checksumStart": 8,
+  "checksumEnd": 232,
+  "allowedBalls": [1, 2, 3, 4, 12],
+  "heightDeviation": 0.4,
+  "weightDeviation": 0.4
 }
