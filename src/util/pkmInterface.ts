@@ -89,6 +89,12 @@ export interface AllPKMFields {
   personalityValue?: number
   pokeStarFame?: number
   pokerusByte?: number
+  receivedDay?: number
+  receivedHour?: number
+  receivedMinute?: number
+  receivedMonth?: number
+  receivedSecond?: number
+  receivedYear?: number
   region?: number
   relearnMoves?: number[]
   resortEventStatus?: number

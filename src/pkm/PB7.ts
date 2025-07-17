@@ -9,6 +9,7 @@ import {
   NatureToString,
 } from 'pokemon-resources'
 import * as byteLogic from '../util/byteLogic'
+import * as encryption from '../util/encryption'
 import { AllPKMFields } from '../util/pkmInterface'
 import { getLevelGen3Onward, getStats } from '../util/statCalc'
 import * as stringLogic from '../util/stringConversion'
@@ -65,6 +66,12 @@ export class PB7 {
   enjoyment: number
   trainerName: string
   trainerFriendship: number
+  receivedYear: number
+  receivedMonth: number
+  receivedDay: number
+  receivedHour: number
+  receivedMinute: number
+  receivedSecond: number
   eggDate: types.PKMDate | undefined
   metDate: types.PKMDate | undefined
   eggLocationIndex: number
@@ -78,9 +85,14 @@ export class PB7 {
   statusCondition: number
   currentHP: number
   trainerGender: boolean
-  constructor(arg: ArrayBuffer | AllPKMFields) {
+  constructor(arg: ArrayBuffer | AllPKMFields, encrypted?: boolean) {
     if (arg instanceof ArrayBuffer) {
-      const buffer = arg
+      let buffer = arg
+      if (encrypted) {
+        const unencryptedBytes = encryption.decryptByteArrayGen67(buffer)
+        const unshuffledBytes = encryption.unshuffleBlocksGen67(unencryptedBytes)
+        buffer = unshuffledBytes
+      }
       const dataView = new DataView(buffer)
       this.encryptionConstant = dataView.getUint32(0x0, true)
       this.checksum = dataView.getUint16(0x6, true)
@@ -144,6 +156,12 @@ export class PB7 {
       this.enjoyment = dataView.getUint8(0xaf)
       this.trainerName = stringLogic.utf16BytesToString(buffer, 0xb0, 12)
       this.trainerFriendship = dataView.getUint8(0xca)
+      this.receivedYear = dataView.getUint8(0xcb)
+      this.receivedMonth = dataView.getUint8(0xcc)
+      this.receivedDay = dataView.getUint8(0xcd)
+      this.receivedHour = dataView.getUint8(0xce)
+      this.receivedMinute = dataView.getUint8(0xcf)
+      this.receivedSecond = dataView.getUint8(0xd0)
       this.eggDate = types.pkmDateFromBytes(dataView, 0xd1)
       this.metDate = types.pkmDateFromBytes(dataView, 0xd4)
       this.eggLocationIndex = dataView.getUint16(0xd8, true)
@@ -242,6 +260,12 @@ export class PB7 {
       this.enjoyment = other.enjoyment ?? 0
       this.trainerName = other.trainerName
       this.trainerFriendship = other.trainerFriendship ?? 0
+      this.receivedYear = other.receivedYear ?? 0
+      this.receivedMonth = other.receivedMonth ?? 0
+      this.receivedDay = other.receivedDay ?? 0
+      this.receivedHour = other.receivedHour ?? 0
+      this.receivedMinute = other.receivedMinute ?? 0
+      this.receivedSecond = other.receivedSecond ?? 0
       this.eggDate = other.eggDate ?? undefined
       this.metDate = other.metDate ?? {
         month: new Date().getMonth(),
@@ -334,6 +358,12 @@ export class PB7 {
     dataView.setUint8(0xaf, this.enjoyment)
     stringLogic.writeUTF16StringToBytes(dataView, this.trainerName, 0xb0, 12)
     dataView.setUint8(0xca, this.trainerFriendship)
+    dataView.setUint8(0xcb, this.receivedYear)
+    dataView.setUint8(0xcc, this.receivedMonth)
+    dataView.setUint8(0xcd, this.receivedDay)
+    dataView.setUint8(0xce, this.receivedHour)
+    dataView.setUint8(0xcf, this.receivedMinute)
+    dataView.setUint8(0xd0, this.receivedSecond)
     types.writePKMDateToBytes(dataView, 0xd1, this.eggDate)
     types.writePKMDateToBytes(dataView, 0xd4, this.metDate)
     dataView.setUint16(0xd8, this.eggLocationIndex, true)
@@ -388,6 +418,19 @@ export class PB7 {
 
   public get natureName() {
     return NatureToString(this.nature)
+  }
+
+  public calcChecksum() {
+    return encryption.get16BitChecksumLittleEndian(this.toBytes(), 0x08, 0xe8)
+  }
+
+  public refreshChecksum() {
+    this.checksum = encryption.get16BitChecksumLittleEndian(this.toBytes(), 0x08, 0xe8)
+  }
+
+  public toPCBytes() {
+    const shuffledBytes = encryption.shuffleBlocksGen67(this.toBytes())
+    return encryption.decryptByteArrayGen67(shuffledBytes)
   }
 
   public getLevel() {

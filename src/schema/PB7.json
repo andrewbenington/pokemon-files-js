@@ -284,6 +284,42 @@
       "numBytes": 1
     },
     {
+      "name": "receivedYear",
+      "type": "number",
+      "byteOffset": 203,
+      "numBytes": 1
+    },
+    {
+      "name": "receivedMonth",
+      "type": "number",
+      "byteOffset": 204,
+      "numBytes": 1
+    },
+    {
+      "name": "receivedDay",
+      "type": "number",
+      "byteOffset": 205,
+      "numBytes": 1
+    },
+    {
+      "name": "receivedHour",
+      "type": "number",
+      "byteOffset": 206,
+      "numBytes": 1
+    },
+    {
+      "name": "receivedMinute",
+      "type": "number",
+      "byteOffset": 207,
+      "numBytes": 1
+    },
+    {
+      "name": "receivedSecond",
+      "type": "number",
+      "byteOffset": 208,
+      "numBytes": 1
+    },
+    {
       "name": "eggDate",
       "type": "pokedate | undefined",
       "byteOffset": 209,
