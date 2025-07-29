@@ -176,7 +176,12 @@ export const unshuffleBlocksGen45 = (bytes: ArrayBuffer) => {
 
 const ENCRYPTION_OFFSET = 8
 const decryptByteArray = (bytes: ArrayBuffer, seed: number, blockSize: number) => {
-  return decryptArray(bytes, seed, ENCRYPTION_OFFSET, ENCRYPTION_OFFSET + 4 * blockSize)
+  const boxSize = ENCRYPTION_OFFSET + 4 * blockSize
+  const boxData = decryptArray(bytes, seed, ENCRYPTION_OFFSET, boxSize)
+  if (bytes.byteLength === boxSize) {
+    return boxData
+  }
+  return decryptArray(bytes, seed, boxSize, bytes.byteLength)
 }
 
 const decryptArray = (bytes: ArrayBuffer, seed: number, start: number, end: number) => {

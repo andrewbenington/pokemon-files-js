@@ -1,5 +1,5 @@
 {
-  "totalBytes": 232,
+  "totalBytes": 260,
   "totalBytesExtraFields": 260,
   "fileName": "PB7",
   "fields": [
@@ -385,14 +385,54 @@
       "name": "statusCondition",
       "type": "number",
       "byteOffset": 232,
-      "lengthCheck": 260,
+      "numBytes": 4
+    },
+    {
+      "name": "level",
+      "type": "number",
+      "byteOffset": 236,
+      "numBytes": 1
+    },
+    {
+      "name": "dirtType",
+      "type": "number",
+      "byteOffset": 237,
+      "numBytes": 1
+    },
+    {
+      "name": "dirtLocation",
+      "type": "number",
+      "byteOffset": 238,
       "numBytes": 1
     },
     {
       "name": "currentHP",
       "type": "number",
       "byteOffset": 240,
-      "lengthCheck": 260,
+      "numBytes": 1
+    },
+    {
+      "name": "stats",
+      "type": "stats",
+      "byteOffset": 242,
+      "numBytes": 12
+    },
+    {
+      "name": "cp",
+      "type": "number",
+      "byteOffset": 254,
+      "numBytes": 2
+    },
+    {
+      "name": "isMega",
+      "type": "number",
+      "byteOffset": 256,
+      "numBytes": 1
+    },
+    {
+      "name": "megaForme",
+      "type": "number",
+      "byteOffset": 257,
       "numBytes": 1
     },
     {

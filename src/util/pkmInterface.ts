@@ -18,8 +18,11 @@ export interface AllPKMFields {
   contest?: types.ContestStats
   contestMemoryCount?: number
   country?: number
+  cp?: number
   currentHP: number
   dexNum: number
+  dirtLocation?: number
+  dirtType?: number
   dvs?: types.StatsPreSplit
   dynamaxLevel?: number
   eggDate?: types.PKMDate | undefined
@@ -60,6 +63,7 @@ export interface AllPKMFields {
   isCurrentHandler?: boolean
   isEgg?: boolean
   isFatefulEncounter?: boolean
+  isMega?: number
   isNicknamed?: boolean
   isNoble?: boolean
   isNsPokemon?: boolean
@@ -67,10 +71,11 @@ export interface AllPKMFields {
   languageIndex: number
   level?: number
   markings?:
-    | types.MarkingsFourShapes
     | types.MarkingsSixShapesNoColor
     | types.MarkingsSixShapesWithColor
+    | types.MarkingsFourShapes
   masterFlagsLA?: Uint8Array
+  megaForme?: number
   metDate?: types.PKMDate | undefined
   metLevel?: number
   metLocationIndex?: number
