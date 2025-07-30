@@ -28,7 +28,7 @@
   "homepage": "https://github.com/andrewbenington/pokemon-files-js#readme",
   "dependencies": {
     "pokemon-resources": "^1.0.12",
-    "pokemon-species-data": "^0.4.4",
+    "pokemon-species-data": "^0.4.6",
     "prando": "^6.0.1"
   },
   "devDependencies": {
